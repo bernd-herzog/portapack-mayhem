@@ -51,6 +51,7 @@ using asahi_kasei::ak4951::AK4951;
 #include "file.hpp" 
 #include "sd_card.hpp"
 #include "string_format.hpp"
+//#include "lua_binding.hpp"
 
 namespace portapack {
 
@@ -87,6 +88,7 @@ ReceiverModel receiver_model;
 TransmitterModel transmitter_model;
 
 TemperatureLogger temperature_logger;
+//LuaBinding lua_binding;
 
 bool antenna_bias { false };
 uint32_t bl_tick_counter { 0 };
@@ -510,7 +512,7 @@ bool init() {
 	chThdSleepMilliseconds(10);
 
 	audio::init(portapack_audio_codec());
-	
+	//lua_binding.init();
 
 	return true;
 }
@@ -523,6 +525,7 @@ void shutdown() {
 	
 	radio::disable();
 	audio::shutdown();
+	//lua_binding.shutdown();
 
 	hackrf::cpld::init_from_eeprom();
 

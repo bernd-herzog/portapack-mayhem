@@ -136,12 +136,15 @@ Continuous (Fox-oring)
 #include "led.hpp"
 
 #include "gcc.hpp"
-
+#include "ui.hpp"
 #include "sd_card.hpp"
 
+#include "chheap.h"
+
 #include <string.h>
- 
+
 #include "rffc507x.hpp"      /* c/m, avoiding initial short ON Ant_DC_Bias pulse, from cold reset  */
+
 rffc507x::RFFC507x first_if;
 
 static void event_loop() {
@@ -160,6 +163,112 @@ static void event_loop() {
 	};
 
 	event_dispatcher.run();
+}
+
+
+
+extern "C" {
+
+	extern char debug_messages[3][16];
+	char debug_messages[3][16];
+	
+	void test_heap(char *a){
+		strncpy(debug_messages[0], a, 16);
+		strncpy(debug_messages[1], "th1", 16);
+		void * p = realloc(NULL, 1122);
+		free (p);
+		strncpy(debug_messages[1], "th2", 16);
+		size_t m0_fragmented_free_space = 0;
+		chHeapStatus(NULL, &m0_fragmented_free_space);
+		strncpy(debug_messages[1], "th3", 16);
+		strncpy(debug_messages[2], std::to_string(m0_fragmented_free_space).c_str(), 16);
+	}
+
+
+
+	CH_IRQ_HANDLER(HardFaultVector) {
+		CH_IRQ_PROLOGUE();
+		//portapack::shutdown();
+		//m4_init(portapack::spi_flash::image_tag_hackrf, portapack::memory::map::m4_code_hackrf, true);
+		//m0_halt();
+		ui::Rect screen_rect = portapack::display.screen_rect();
+
+		portapack::display.fill_rectangle(screen_rect, ui::Color::dark_grey());
+		portapack::display.draw_line(screen_rect.location(), screen_rect.center(), ui::Color::blue());
+
+		//std::stringstream ss;
+		//ss << "SCB CPUID" << SCB->CPUID << " end";
+
+		//ss >> s;
+
+		//char buf[42];
+		//snprintf(buf, 41, "%lX", SCB->CPUID);
+
+		//s.append(buf);
+
+		// debug_messages[0] = "text 1";
+		// debug_messages[1] = "text 2";
+
+		ui::Style style_default {
+			.font = ui::font::fixed_8x16,
+			.background = ui::Color::black(),
+			.foreground = ui::Color::white()
+		};
+
+		//portapack::display
+		//std::string s(buf);
+
+		const auto m0_core_free = chCoreStatus();
+		ui::Painter().draw_string(ui::Point(5, 5), style_default, std::string("free core:"));
+		ui::Painter().draw_string(ui::Point(120, 5), style_default, std::string(std::to_string(m0_core_free)));
+		ui::Painter().draw_string(ui::Point(5, 25), style_default, std::string("free heap:"));
+
+		ui::Painter().draw_string(ui::Point(5, 45), style_default, std::string(debug_messages[0]));
+		ui::Painter().draw_string(ui::Point(5, 65), style_default, std::string(debug_messages[1]));
+		ui::Painter().draw_string(ui::Point(5, 85), style_default, std::string(debug_messages[2]));
+
+
+
+		//ui::Painter().draw_string(ui::Point(120, 25), style_default, std::string("1"));
+		//union heap_header *qp = &get_default_heap()->h_free;
+//
+		//ui::Painter().draw_string(ui::Point(120, 25), style_default, std::string("2"));
+//
+		//int i = 55;
+		//ui::Painter().draw_string(ui::Point(5, i), style_default, std::to_string(qp->h.size));
+		//ui::Painter().draw_string(ui::Point(120, i), style_default, std::to_string((unsigned int)qp->h.u.next));
+		//
+		//while(qp = qp->h.u.next) {
+		//	i+= 20;
+		//	ui::Painter().draw_string(ui::Point(5, i), style_default, std::to_string(qp->h.size));
+		//	ui::Painter().draw_string(ui::Point(120, i), style_default, std::to_string((unsigned int)qp->h.u.next));
+		//}
+		//
+//
+		//size_t m0_fragmented_free_space = 0;
+		//const auto m0_fragments = chHeapStatus(NULL, &m0_fragmented_free_space);
+		//ui::Painter().draw_string(ui::Point(120, 25), style_default, std::string("3"));
+//
+		//ui::Painter().draw_string(ui::Point(120, 25), style_default, std::to_string(m0_fragmented_free_space));
+
+		
+		//while (!debug_messages.empty()) {
+		//	ui::Painter().draw_string(ui::Point(5, i), style_default, debug_messages.front());
+        //	debug_messages.pop();
+		//	i+= 20;
+    	//}
+
+		
+
+		// if (SCB->CFSR & SCB_CFSR_MSTKERR_Msk) {
+		// 	// fault_printf("Stacking error");
+		// 	// fault_info.decoded_fault_registers.memfault.stacking_error = true;
+		// }
+
+		chSysHalt();
+
+		CH_IRQ_EPILOGUE();
+	}
 }
 
 int main(void) {
