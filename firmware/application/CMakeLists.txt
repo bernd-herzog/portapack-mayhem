@@ -30,7 +30,7 @@ enable_language(C CXX ASM)
 project(application)
 
 # Compiler options here.
-set(USE_OPT "-Os -g --specs=nano.specs")
+set(USE_OPT "-Os -g --specs=nano.specs --specs=nosys.specs")
 
 # C specific options here (added to USE_OPT).
 set(USE_COPT "-std=gnu99")
@@ -104,6 +104,38 @@ set(CSRC
 	${BOARDSRC}
 	${FATFSSRC}
 	firmware_info.c
+	lua/lapi.c
+	lua/lcode.c
+	lua/lctype.c
+	lua/ldebug.c
+	lua/ldo.c
+	lua/ldump.c
+	lua/lfunc.c
+	lua/lgc.c
+	lua/llex.c
+	lua/lmem.c
+	lua/lobject.c
+	lua/lopcodes.c
+	lua/lparser.c
+	lua/lstate.c
+	lua/lstring.c
+	lua/ltable.c
+	lua/ltm.c
+	lua/lundump.c
+	lua/lvm.c
+	lua/lzio.c
+	lua/lauxlib.c
+	lua/lbaselib.c
+	lua/lcorolib.c
+	lua/ldblib.c
+	lua/liolib.c
+	lua/lmathlib.c
+	lua/loadlib.c
+	lua/loslib.c
+	lua/lstrlib.c
+	lua/ltablib.c
+	lua/lutf8lib.c
+	lua/linit.c
 )
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -254,6 +286,7 @@ set(CPPSRC
 	apps/ui_siggen.cpp
 	apps/ui_sonde.cpp
 	apps/ui_sstvtx.cpp
+	apps/ui_lua.cpp
 	# apps/ui_test.cpp
 	apps/ui_tone_search.cpp
 	apps/ui_touch_calibration.cpp
@@ -293,6 +326,7 @@ set(CPPSRC
 	${CPLD_20150901_DATA_CPP}
 	${CPLD_20170522_DATA_CPP}
 	${HACKRF_CPLD_DATA_CPP}
+	lua_binding.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.
