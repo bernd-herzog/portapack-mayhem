@@ -106,7 +106,7 @@ set(CSRC
 	firmware_info.c
 	lua/lapi.c
 	lua/lcode.c
-	lua/lctype.c
+	#lua/lctype.c
 	lua/ldebug.c
 	lua/ldo.c
 	lua/ldump.c
@@ -126,7 +126,9 @@ set(CSRC
 	lua/lzio.c
 	lua/lauxlib.c
 	lua/lbaselib.c
-	lua/lcorolib.c
+	#lua/lcorolib.c
+	lua/legc.c
+	lua/lrotable.c
 	lua/ldblib.c
 	lua/liolib.c
 	lua/lmathlib.c
@@ -134,7 +136,7 @@ set(CSRC
 	lua/loslib.c
 	lua/lstrlib.c
 	lua/ltablib.c
-	lua/lutf8lib.c
+	#lua/lutf8lib.c
 	lua/linit.c
 )
 

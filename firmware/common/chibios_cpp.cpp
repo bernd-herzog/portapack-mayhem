@@ -33,19 +33,19 @@ void* operator new[](size_t size) {
 	return chHeapAlloc(0x0, size);
 }
 
-void operator delete(void* p) noexcept {
+void operator delete(void* p) {
 	chHeapFree(p);
 }
 
-void operator delete[](void* p) noexcept {
+void operator delete[](void* p) {
 	chHeapFree(p);
 }
 
-void operator delete(void* ptr, std::size_t) noexcept {
+void operator delete(void* ptr, std::size_t) {
 	::operator delete(ptr);
 }
 
-void operator delete[](void* ptr, std::size_t) noexcept {
+void operator delete[](void* ptr, std::size_t) {
 	::operator delete(ptr);
 }
 

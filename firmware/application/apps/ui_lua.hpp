@@ -56,7 +56,7 @@ public:
 	std::string title() const override { return "Lua"; };
 
 private:
-	LuaBinding lua_binding;
+	//LuaBinding lua_binding;
 	
 	Labels labels {
 		{ { 0 * 8, 0 * 8 }, "LNA:   VGA:   AMP:", Color::light_grey() }

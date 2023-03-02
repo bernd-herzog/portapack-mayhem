@@ -21,6 +21,7 @@
  */
 
 #include <strings.h>
+#include "ch.h"
 
 #include "ui_lua.hpp"
 #include "ui_alphanum.hpp"
@@ -32,8 +33,8 @@
 #include "lua/lstate.h"
 
 //#include "portapack_persistent_memory.hpp"
-extern char *debug_messages[2];
-extern "C" { extern void test_heap(char *a); }
+extern char debug_messages[3][16];
+//extern "C" { extern void test_heap(char *a); }
 
 using namespace portapack;
 
@@ -47,7 +48,7 @@ LuaView::~LuaView() {
 	//receiver_model.set_tuning_frequency(prevFreq);
 	//rtc_time::signal_tick_second -= signal_token_tick_second;
 	//receiver_model.disable();
-	lua_binding.shutdown();
+	//
 	baseband::shutdown();
 }
 
@@ -66,17 +67,33 @@ LuaView::LuaView(NavigationView& nav) {
 
   	//debug_messages[0] = "LuaView f1";
 	
+//	if (lua_binding != nullptr) {
+//		char *s = lua_binding->get_str();
+//		
+//		strncpy(debug_messages[2], s, 16);
+//	}
+	portapack::lua_binding->enable();
+	//portapack::lua_binding->get_str();
+	char *s = portapack::lua_binding->get_buf();
+
+	labels.set_labels({{ { 0 * 8, 0 * 8 }, s, Color::light_grey() },});
 	
 
-
 	//debug_messages[0] = "LuaView f2";
-	test_heap("lua_view1");
-	lua_binding.init();
+	//test_heap("lua_view1");
+	//lua_binding.init();
+	//lua_binding.shutdown();
+
+	//chSysLock();
+	//char *u = lua_binding.get_str();
+	//chSysUnlock();
+
+	
 	//debug_messages[0] = "LuaView f3";
 	//realloc(NULL, 222);
 	//debug_messages[0] = "LuaView f3b";
 
-	test_heap("lua_view2");
+	//test_heap("lua_view2");
 	//chHeapStatus(NULL, &m0_fragmented_free_space);
 
   	//debug_messages[1] = (char *)std::to_string(m0_fragmented_free_space).c_str();

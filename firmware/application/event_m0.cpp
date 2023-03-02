@@ -174,6 +174,8 @@ void EventDispatcher::dispatch(const eventmask_t events) {
 		return;
 	}
 
+	portapack::do_lua();
+
 	if( events & EVT_MASK_APPLICATION ) {
 		handle_application_queue();
 	}
