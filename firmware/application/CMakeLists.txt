@@ -309,6 +309,7 @@ set(CPPSRC
 	apps/soundboard_app.cpp
 	apps/ui_recon.cpp  
 	apps/ui_recon_settings.cpp
+	apps/ui_level.cpp  
 	apps/tpms_app.cpp
 	apps/tpms_app.cpp
 	protocols/aprs.cpp
