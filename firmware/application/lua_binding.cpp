@@ -33,16 +33,23 @@ char s_str[16];
     }
 //}
 
-extern char debug_messages[3][16];
 
 LuaBinding::LuaBinding(){
     this->enabled = 55;
-    //std::string s = std::to_string((int) this);
-    //strncpy(debug_messages[0], s.c_str(), 16);
+}
+
+LuaBinding::LuaBinding(const LuaBinding& other){
+    this->luaState = other.luaState;
+    this->enabled = other.enabled;
+}
+
+LuaBinding& LuaBinding::operator=(const LuaBinding& other){
+    this->luaState = other.luaState;
+    this->enabled = other.enabled;
+    return *this;
 }
 
 LuaBinding::~LuaBinding(){
-    //strncpy(debug_messages[2], "dtor", 16);
 }
 
 
@@ -50,7 +57,7 @@ LuaBinding::~LuaBinding(){
 void LuaBinding::init() {
     lua_State *luaState = luaL_newstate();
     this->luaState = luaState;
-	//luaL_openlibs(luaState); // bad
+	luaL_openlibs(luaState); // bad
 
     lua_pushcfunction(luaState, l_sin);
 	lua_setglobal(luaState, "RegisterEvent");
@@ -58,23 +65,18 @@ void LuaBinding::init() {
 
 void LuaBinding::enable() {
     this->enabled = 1337;
-    //strncpy(debug_messages[0], "enable", 16);
 }
 
 void LuaBinding::get_str() {
 
-    std::string s = std::to_string(this->enabled);
-    strncpy(debug_messages[1], s.c_str(), 16);
+    //std::string s = std::to_string(this->enabled);
 
 
 	if (this->enabled == 1337) {
-        strncpy(debug_messages[2], "enabled", 16);
-        //luaL_dostring(luaState, "RegisterEvent('Hello LUA');"); // bad
-        std::string s = std::to_string(this->enabled);
-        strncpy(debug_messages[1], s.c_str(), 16);
+        luaL_dostring(luaState, "RegisterEvent('Hello LUA');"); // bad
+        //std::string s = std::to_string(this->enabled);
     }
     else {
-        strncpy(debug_messages[2], "disabled", 16);
     }
 
     //strncpy(this->buf, "2", 16);

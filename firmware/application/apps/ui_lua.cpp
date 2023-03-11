@@ -32,10 +32,6 @@
 
 #include "lua/lstate.h"
 
-//#include "portapack_persistent_memory.hpp"
-extern char debug_messages[3][16];
-//extern "C" { extern void test_heap(char *a); }
-
 using namespace portapack;
 
 namespace ui {
@@ -54,10 +50,15 @@ LuaView::~LuaView() {
 
 LuaView::LuaView(NavigationView& nav) {
 
+	//chDbgPanic("sadf");
+    void (*bad_instruction)(void);
+    bad_instruction = (void (*)())0xE0000000;
+    bad_instruction(); // more bad
+
+	
 
 	//size_t m0_fragmented_free_space = 0;
 	//chHeapStatus(NULL, &m0_fragmented_free_space);
-  	//debug_messages[1] = (char *)std::to_string(m0_fragmented_free_space).c_str();
 
 	baseband::run_image(portapack::spi_flash::image_tag_test);
 
@@ -65,13 +66,7 @@ LuaView::LuaView(NavigationView& nav) {
 		&labels,
 	});
 
-  	//debug_messages[0] = "LuaView f1";
 	
-//	if (lua_binding != nullptr) {
-//		char *s = lua_binding->get_str();
-//		
-//		strncpy(debug_messages[2], s, 16);
-//	}
 	portapack::lua_binding->enable();
 	//portapack::lua_binding->get_str();
 	char *s = portapack::lua_binding->get_buf();
@@ -79,49 +74,6 @@ LuaView::LuaView(NavigationView& nav) {
 	labels.set_labels({{ { 0 * 8, 0 * 8 }, s, Color::light_grey() },});
 	
 
-	//debug_messages[0] = "LuaView f2";
-	//test_heap("lua_view1");
-	//lua_binding.init();
-	//lua_binding.shutdown();
-
-	//chSysLock();
-	//char *u = lua_binding.get_str();
-	//chSysUnlock();
-
-	
-	//debug_messages[0] = "LuaView f3";
-	//realloc(NULL, 222);
-	//debug_messages[0] = "LuaView f3b";
-
-	//test_heap("lua_view2");
-	//chHeapStatus(NULL, &m0_fragmented_free_space);
-
-  	//debug_messages[1] = (char *)std::to_string(m0_fragmented_free_space).c_str();
-	//debug_messages[0] = "LuaView f4";
-	//global_State *g = nullptr;
-	//try
-	//{
-	//	
-	//	//labels.set_labels({{ { 0 * 8, 0 * 8 }, "Very long text 12234567890", Color::light_grey() },});
-	//}
-	//catch(...)
-	//{
-	//	labels.set_labels({{ { 0 * 8, 0 * 8 }, "Exception", Color::light_grey() },});
-	//}
-	
-	//void *i = realloc(NULL, 2086);
-	//char buf[10];
-	//snprintf(buf, 10, "%X", i);
-	//labels.set_labels({{ { 0 * 8, 0 * 8 }, buf, Color::light_grey() },});
-	//
-
-	//baseband::set_adsb();
-	//
-	//receiver_model.set_tuning_frequency(1090000000);
-	//receiver_model.set_modulation(ReceiverModel::Mode::SpectrumAnalysis);
-	//receiver_model.set_sampling_rate(2000000);
-	//receiver_model.set_baseband_bandwidth(2500000);
-	//receiver_model.enable();
 }
 
 } /* namespace ui */

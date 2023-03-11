@@ -151,9 +151,17 @@ vectors_t _vectors = {
 __attribute__ ((naked))
 #endif
 void _unhandled_exception(void) {
+  uint32_t *clr = (uint32_t *)0x400f4000 + 0x2280;
+  uint32_t *not = (uint32_t *)0x400f4000 + 0x2300;
+  clr[2] = (1 << 8);
+  //LPC_GPIO->CLR[2] = (1 << 8);
+  while(true) {
+		volatile size_t n = 100000U;
+		while(n--);
+    not[2]= (1 << 8);
+		//LPC_GPIO->NOT[2] = (1 << 8);
+	}
 
-  while (TRUE)
-    ;
 }
 
 void NMIVector(void) __attribute__((weak, alias("_unhandled_exception")));

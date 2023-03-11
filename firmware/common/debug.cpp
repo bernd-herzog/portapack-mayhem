@@ -50,7 +50,6 @@ static void debug_indicate_error_update() {
 	// TODO: Get knowledge of LED GPIO port/bit from shared place.
 	LPC_GPIO->NOT[2] = (1 << 8);
 }
-#endif
 
 static void runtime_error() {
 	debug_indicate_error_init();
@@ -61,8 +60,10 @@ static void runtime_error() {
 		debug_indicate_error_update();
 	}
 }
+#endif
 
 extern "C" {
+#if defined(LPC43XX_M4)
 
 void port_halt(void) {
 	// Copy debug panic message to M0 region.
@@ -79,7 +80,6 @@ void port_halt(void) {
 	runtime_error();
 }
 
-#if defined(LPC43XX_M4)
 CH_IRQ_HANDLER(MemManageVector) {
 #if CH_DBG_ENABLED
 	chDbgPanic("MemManage");
@@ -104,5 +104,4 @@ CH_IRQ_HANDLER(UsageFaultVector) {
 #endif
 }
 #endif
-
 }

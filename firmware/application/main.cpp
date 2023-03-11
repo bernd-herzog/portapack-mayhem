@@ -165,112 +165,6 @@ static void event_loop() {
 	event_dispatcher.run();
 }
 
-
-
-extern "C" {
-
-	extern char debug_messages[3][16];
-	char debug_messages[3][16];
-	
-	void test_heap(char *a){
-		strncpy(debug_messages[0], a, 16);
-		strncpy(debug_messages[1], "th1", 16);
-		void * p = realloc(NULL, 1122);
-		free (p);
-		strncpy(debug_messages[1], "th2", 16);
-		size_t m0_fragmented_free_space = 0;
-		chHeapStatus(NULL, &m0_fragmented_free_space);
-		strncpy(debug_messages[1], "th3", 16);
-		strncpy(debug_messages[2], std::to_string(m0_fragmented_free_space).c_str(), 16);
-	}
-
-
-
-	CH_IRQ_HANDLER(HardFaultVector) {
-		CH_IRQ_PROLOGUE();
-		//portapack::shutdown();
-		//m4_init(portapack::spi_flash::image_tag_hackrf, portapack::memory::map::m4_code_hackrf, true);
-		//m0_halt();
-		ui::Rect screen_rect = portapack::display.screen_rect();
-
-		portapack::display.fill_rectangle(screen_rect, ui::Color::dark_grey());
-		portapack::display.draw_line(screen_rect.location(), screen_rect.center(), ui::Color::blue());
-
-		//std::stringstream ss;
-		//ss << "SCB CPUID" << SCB->CPUID << " end";
-
-		//ss >> s;
-
-		//char buf[42];
-		//snprintf(buf, 41, "%lX", SCB->CPUID);
-
-		//s.append(buf);
-
-		// debug_messages[0] = "text 1";
-		// debug_messages[1] = "text 2";
-
-		ui::Style style_default {
-			.font = ui::font::fixed_8x16,
-			.background = ui::Color::black(),
-			.foreground = ui::Color::white()
-		};
-
-		//portapack::display
-		//std::string s(buf);
-
-		const auto m0_core_free = chCoreStatus();
-		ui::Painter().draw_string(ui::Point(5, 5), style_default, std::string("free core:"));
-		ui::Painter().draw_string(ui::Point(120, 5), style_default, std::string(std::to_string(m0_core_free)));
-		ui::Painter().draw_string(ui::Point(5, 25), style_default, std::string("free heap:"));
-
-		ui::Painter().draw_string(ui::Point(5, 45), style_default, std::string(debug_messages[0]));
-		ui::Painter().draw_string(ui::Point(5, 65), style_default, std::string(debug_messages[1]));
-		ui::Painter().draw_string(ui::Point(5, 85), style_default, std::string(debug_messages[2]));
-
-
-
-		//ui::Painter().draw_string(ui::Point(120, 25), style_default, std::string("1"));
-		//union heap_header *qp = &get_default_heap()->h_free;
-//
-		//ui::Painter().draw_string(ui::Point(120, 25), style_default, std::string("2"));
-//
-		//int i = 55;
-		//ui::Painter().draw_string(ui::Point(5, i), style_default, std::to_string(qp->h.size));
-		//ui::Painter().draw_string(ui::Point(120, i), style_default, std::to_string((unsigned int)qp->h.u.next));
-		//
-		//while(qp = qp->h.u.next) {
-		//	i+= 20;
-		//	ui::Painter().draw_string(ui::Point(5, i), style_default, std::to_string(qp->h.size));
-		//	ui::Painter().draw_string(ui::Point(120, i), style_default, std::to_string((unsigned int)qp->h.u.next));
-		//}
-		//
-//
-		//size_t m0_fragmented_free_space = 0;
-		//const auto m0_fragments = chHeapStatus(NULL, &m0_fragmented_free_space);
-		//ui::Painter().draw_string(ui::Point(120, 25), style_default, std::string("3"));
-//
-		//ui::Painter().draw_string(ui::Point(120, 25), style_default, std::to_string(m0_fragmented_free_space));
-
-		
-		//while (!debug_messages.empty()) {
-		//	ui::Painter().draw_string(ui::Point(5, i), style_default, debug_messages.front());
-        //	debug_messages.pop();
-		//	i+= 20;
-    	//}
-
-		
-
-		// if (SCB->CFSR & SCB_CFSR_MSTKERR_Msk) {
-		// 	// fault_printf("Stacking error");
-		// 	// fault_info.decoded_fault_registers.memfault.stacking_error = true;
-		// }
-
-		chSysHalt();
-
-		CH_IRQ_EPILOGUE();
-	}
-}
-
 int main(void) {
 	first_if.init();    /* To avoid initial short Ant_DC_Bias pulse ,we need quick set up GP01_RFF507X =1 */
 	if( portapack::init() ) {
@@ -295,4 +189,194 @@ int main(void) {
 	m0_halt();
 
 	return 0;
+}
+
+void draw_error(const char * const source, const char * const error) {
+	//ui::Painter painter;
+	ui::Style style_default {
+		.font = ui::font::fixed_8x16,
+		.background = ui::Color::black(),
+		.foreground = ui::Color::white()
+	};
+
+	ui::Painter().draw_string({ 48, 24 }, style_default, "M4 Guru M");
+	std::string message = source;
+	int x_offset = (portapack::display.width() - (message.size() * 8)) / 2;
+	int y_offset = (portapack::display.height() - 16) / 2;
+	ui::Painter().draw_string(
+		{ x_offset, y_offset },
+		style_default,
+		message
+	);
+	message = error;
+	x_offset = (portapack::display.width() - (message.size() * 8)) / 2;
+	y_offset = (portapack::display.height() + 16) / 2;
+	ui::Painter().draw_string(
+		{ x_offset, y_offset },
+		style_default,
+		message
+	);
+}
+
+static void debug_indicate_error_init() {
+	// TODO: Get knowledge of LED GPIO port/bit from shared place.
+	LPC_GPIO->CLR[2] = (1 << 8);
+}
+
+static void debug_indicate_error_update() {
+	// Flash TX (red) LED to indicate baseband error.
+	// TODO: Get knowledge of LED GPIO port/bit from shared place.
+	LPC_GPIO->NOT[2] = (1 << 8);
+}
+
+static void runtime_error() {
+	debug_indicate_error_init();
+
+	while(true) {
+		volatile size_t n = 1000000U;
+		while(n--);
+		debug_indicate_error_update();
+	}
+}
+
+extern "C" {
+void port_halt(void) {
+	draw_error("port_halt", dbg_panic_msg);
+	port_disable();
+	runtime_error();
+}
+
+// CH_IRQ_HANDLER(HardFaultVector) {
+// 	CH_IRQ_PROLOGUE();
+
+// 	draw_error("HardFaultVector", dbg_panic_msg);
+// 	port_disable();
+// 	runtime_error();
+
+// 	CH_IRQ_EPILOGUE();
+// }
+
+typedef struct {
+	uint32_t r0;
+	uint32_t r1;
+	uint32_t r2;
+	uint32_t r3;
+	uint32_t r12;
+	uint32_t lr;  /* Link Register. */
+	uint32_t pc;  /* Program Counter. */
+	uint32_t psr; /* Program Status Register. */
+} hard_fault_stack_t;
+
+volatile hard_fault_stack_t* hard_fault_stack_pt;
+
+
+void hard_fault_handler_c(uint32_t* args)
+{
+	/* hard_fault_stack_pt contains registers saved before the hard fault */
+	hard_fault_stack_pt = (hard_fault_stack_t*) args;
+
+	
+	// args[0-7]: r0, r1, r2, r3, r12, lr, pc, psr
+	draw_error("HardFaultVector", std::to_string(hard_fault_stack_pt->lr).c_str());
+	port_disable();
+	runtime_error();
+}
+
+__STATIC_INLINE uint32_t __get_LR(void)
+{
+  register uint32_t __lr         __ASM("lr");
+  return(__lr);
+}
+
+CH_IRQ_HANDLER(HardFaultVector) {
+	CH_IRQ_PROLOGUE();
+	auto lr = __get_LR();
+
+	if ((lr & 0x04) == 0x04){
+		uint32_t* psp = (uint32_t*)__get_PSP();
+		hard_fault_handler_c(psp);
+	}
+	else{
+		uint32_t* msp = (uint32_t*)__get_MSP();
+		hard_fault_handler_c(msp);
+	}
+
+	// __asm__("TST LR, #4");
+	// __asm__("ITE EQ");
+	// __asm__("MRSEQ R0, MSP");
+	// __asm__("MRSNE R0, PSP");
+	// __asm__("B hard_fault_handler_c");
+
+		//portapack::shutdown();
+		//m4_init(portapack::spi_flash::image_tag_hackrf, portapack::memory::map::m4_code_hackrf, true);
+		//m0_halt();
+		
+		
+		// ui::Rect screen_rect = portapack::display.screen_rect();
+
+		// portapack::display.fill_rectangle(screen_rect, ui::Color::dark_grey());
+		// portapack::display.draw_line(screen_rect.location(), screen_rect.center(), ui::Color::blue());
+
+		// ui::Style style_default {
+		// 	.font = ui::font::fixed_8x16,
+		// 	.background = ui::Color::black(),
+		// 	.foreground = ui::Color::white()
+		// };
+		// //ui::Painter().draw_string({ 48, 24 }, style_default, "M4 Guru Meditation");
+
+		// //portapack::display
+		// //std::string s(buf);
+
+		// const auto m0_core_free = chCoreStatus();
+		// ui::Painter().draw_string(ui::Point(5, 5), style_default, std::string("free core:"));
+		// ui::Painter().draw_string(ui::Point(120, 5), style_default, std::string(std::to_string(m0_core_free)));
+		// ui::Painter().draw_string(ui::Point(5, 25), style_default, std::string("free heap:"));
+
+
+
+		//chSysHalt();
+
+		CH_IRQ_EPILOGUE();
+	}
+
+CH_IRQ_HANDLER(MemManageVector) {
+	CH_IRQ_PROLOGUE();
+
+	draw_error("MemManageVector", dbg_panic_msg);
+	port_disable();
+	runtime_error();
+
+	CH_IRQ_EPILOGUE();
+}
+
+CH_IRQ_HANDLER(BusFaultVector) {
+	CH_IRQ_PROLOGUE();
+
+	draw_error("BusFaultVector", dbg_panic_msg);
+	port_disable();
+	runtime_error();
+
+	CH_IRQ_EPILOGUE();
+}
+
+CH_IRQ_HANDLER(UsageFaultVector) {
+	CH_IRQ_PROLOGUE();
+
+	draw_error("UsageFaultVector", dbg_panic_msg);
+	port_disable();
+	runtime_error();
+
+	CH_IRQ_EPILOGUE();
+}
+
+CH_IRQ_HANDLER(DebugMonitorVector) {
+	CH_IRQ_PROLOGUE();
+
+	draw_error("DebugMonitorVector", dbg_panic_msg);
+	port_disable();
+	runtime_error();
+
+	CH_IRQ_EPILOGUE();
+}
+
 }
