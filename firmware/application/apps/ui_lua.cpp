@@ -51,9 +51,9 @@ LuaView::~LuaView() {
 LuaView::LuaView(NavigationView& nav) {
 
 	//chDbgPanic("sadf");
-    void (*bad_instruction)(void);
-    bad_instruction = (void (*)())0xE0000000;
-    bad_instruction(); // more bad
+    // void (*bad_instruction)(void);
+    // bad_instruction = (void (*)())0xFFFFFFFF;
+    // bad_instruction(); // more bad
 
 	
 

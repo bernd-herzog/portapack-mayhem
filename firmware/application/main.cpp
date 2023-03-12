@@ -256,50 +256,37 @@ void port_halt(void) {
 // 	CH_IRQ_EPILOGUE();
 // }
 
-typedef struct {
-	uint32_t r0;
-	uint32_t r1;
-	uint32_t r2;
-	uint32_t r3;
-	uint32_t r12;
-	uint32_t lr;  /* Link Register. */
-	uint32_t pc;  /* Program Counter. */
-	uint32_t psr; /* Program Status Register. */
-} hard_fault_stack_t;
 
-volatile hard_fault_stack_t* hard_fault_stack_pt;
-
-
-void hard_fault_handler_c(uint32_t* args)
-{
-	/* hard_fault_stack_pt contains registers saved before the hard fault */
-	hard_fault_stack_pt = (hard_fault_stack_t*) args;
-
-	
-	// args[0-7]: r0, r1, r2, r3, r12, lr, pc, psr
-	draw_error("HardFaultVector", std::to_string(hard_fault_stack_pt->lr).c_str());
-	port_disable();
-	runtime_error();
-}
-
-__STATIC_INLINE uint32_t __get_LR(void)
-{
-  register uint32_t __lr         __ASM("lr");
-  return(__lr);
-}
 
 CH_IRQ_HANDLER(HardFaultVector) {
 	CH_IRQ_PROLOGUE();
-	auto lr = __get_LR();
 
-	if ((lr & 0x04) == 0x04){
-		uint32_t* psp = (uint32_t*)__get_PSP();
-		hard_fault_handler_c(psp);
+	if (((uint32_t)_saved_lr & 0x04) == 0x04){
+		register struct extctx *ctxp;
+
+		port_lock_from_isr();
+		/* Adding an artificial exception return context, there is no need to
+		populate it fully.*/
+		asm volatile ("mrs     %0, PSP" : "=r" (ctxp) : : "memory");
+
+		//struct extctx *ctxp = (struct extctx *)__get_PSP();
+		draw_error("HardFaultVector", std::to_string((uint32_t)ctxp->lr_thd).c_str());
+		//arm-none-eabi-gdb application.elf
+		// (gdb) x/20i 0x10E19
+		port_disable();
+		runtime_error();
 	}
 	else{
-		uint32_t* msp = (uint32_t*)__get_MSP();
-		hard_fault_handler_c(msp);
+		struct extctx *ctxp = (struct extctx *)__get_MSP();
+		port_lock_from_isr();
+		draw_error("HardFaultVector", std::to_string((uint32_t)ctxp->lr_thd).c_str());
+		port_disable();
+		runtime_error();
 	}
+
+
+
+
 
 	// __asm__("TST LR, #4");
 	// __asm__("ITE EQ");
