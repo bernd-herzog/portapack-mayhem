@@ -504,6 +504,14 @@ set(MODE_CPPSRC
 )
 DeclareTargets(PWFM wfm_audio)
 
+### Flash Utility
+
+set(MODE_CPPSRC
+	proc_flash_utility.cpp
+)
+DeclareTargets(PFUT flash_utility)
+
+
 ### HackRF "factory" firmware
 
 add_custom_command(

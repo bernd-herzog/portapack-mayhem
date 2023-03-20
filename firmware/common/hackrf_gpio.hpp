@@ -75,6 +75,10 @@ constexpr GPIO gpio_max2839_rxtx = gpio[GPIO2_5];
 
 constexpr GPIO gpio_max5864_select = gpio[GPIO2_7];
 
+constexpr GPIO gpio_w25q80bv_hold = gpio[GPIO1_14];
+constexpr GPIO gpio_w25q80bv_wp = gpio[GPIO1_15];
+constexpr GPIO gpio_w25q80bv_select = gpio[GPIO5_11];
+
 constexpr GPIO gpio_q_invert = gpio[GPIO0_13];
 
 constexpr GPIO gpio_cpld_tdo = gpio[GPIO5_18];
