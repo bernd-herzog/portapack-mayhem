@@ -42,9 +42,6 @@
 
 #define LPC43XX_M0APPTXEVENT_IRQ_PRIORITY   4
 
-#define LPC_SPI_SSP0_IRQ_PRIORITY 3
-#define LPC_SPI_SSP1_IRQ_PRIORITY 3
-
 /* M4 is initialized by M0, which has already started PLL1 */
 #if !defined(LPC43XX_M4_CLK) || defined(__DOXYGEN__)
 #define LPC43XX_M4_CLK                      200000000
