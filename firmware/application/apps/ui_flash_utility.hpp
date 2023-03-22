@@ -27,7 +27,8 @@
 #include "ui_navigation.hpp"
 #include "string_format.hpp"
 #include "ff.h"
-#include "w25q80bv.hpp"
+#include "baseband_api.hpp"
+#include "core_control.hpp"
 
 #include <cstdint>
 
@@ -53,18 +54,8 @@ private:
 		return 0;
 	}
 	
-	void run() {
-		const int count = 16;
-		progress.set_max(count);
+	void run();
 
-		portapack::hw::w25q80bv::erase();
-		for (uint32_t i = 0; i < count; i++) {
-			progress.set_value(i);
-			chThdSleepMilliseconds(20);
-		}
-		nav_.pop();
-	}
-	
 	Text text_info {
 		{ 10 * 8, 16 * 8, 10 * 8, 16 },
 		"Working..."

@@ -1,25 +1,26 @@
 
 #include "w25q80bv.hpp"
+//#include "portapack.hpp"
 
-#include "rf_path.hpp"
+//#include "rf_path.hpp"
+//
+//#include "rffc507x.hpp"
+//#include "max2837.hpp"
+//#include "max2839.hpp"
+//#include "max5864.hpp"
+//#include "baseband_cpld.hpp"
+//
+//#include "tuning.hpp"
+//
+//#include "spi_arbiter.hpp"
+//
+//#include "hackrf_hal.hpp"
+//#include "hackrf_gpio.hpp"
+//using namespace hackrf::one;
+//
+//#include "cpld_update.hpp"
+//
 
-#include "rffc507x.hpp"
-#include "max2837.hpp"
-#include "max2839.hpp"
-#include "max5864.hpp"
-#include "baseband_cpld.hpp"
-
-#include "tuning.hpp"
-
-#include "spi_arbiter.hpp"
-
-#include "hackrf_hal.hpp"
-#include "hackrf_gpio.hpp"
-using namespace hackrf::one;
-
-#include "cpld_update.hpp"
-
-#include "portapack.hpp"
 
 // from hackrf/firmware/libopencm3/include/libopencm3/lpc43xx/rgu.h
 #define MMIO32(addr)		(*(volatile uint32_t *)(addr))
@@ -46,8 +47,8 @@ static constexpr uint32_t ssp0_cpsr = 2;
 
 static constexpr SPIConfig ssp_config_w25q80bv = {
 	.end_cb = NULL,
-	.ssport = gpio_w25q80bv_select.port(),
-	.sspad = gpio_w25q80bv_select.pad(),
+	.ssport = hackrf::one::gpio_w25q80bv_select.port(),
+	.sspad = hackrf::one::gpio_w25q80bv_select.pad(),
 	.cr0 =
 		  CR0_CLOCKRATE(ssp0_cpsr)
 		| CR0_DSS8BIT
@@ -59,33 +60,29 @@ static constexpr SPIConfig ssp_config_w25q80bv = {
 #define W25Q80BV_WRITE_ENABLE 0x06
 #define W25Q80BV_CHIP_ERASE   0xC7
 
-namespace portapack {
-namespace hw {
 namespace w25q80bv {
 void erase() {
 
-	static uint8_t write_enable_data[] = {W25Q80BV_WRITE_ENABLE};
-	static uint8_t erase_data[] = {W25Q80BV_CHIP_ERASE};
-
+	// disable SPIFI
 	RESET_CTRL1 = RESET_CTRL1_SPIFI_RST;
 
+	//start SPI driver
 	spiStart(&SPID1, &ssp_config_w25q80bv);
 
-	gpio_w25q80bv_hold.set();
-	gpio_w25q80bv_wp.set();
-	gpio_w25q80bv_hold.output();
-	gpio_w25q80bv_wp.output();
+	//remove hardware write protection
+	hackrf::one::gpio_w25q80bv_hold.set();
+	hackrf::one::gpio_w25q80bv_wp.set();
+	hackrf::one::gpio_w25q80bv_hold.output();
+	hackrf::one::gpio_w25q80bv_wp.output();
 
+ 	static uint8_t write_enable_data[] = {W25Q80BV_WRITE_ENABLE};
+	static uint8_t erase_data[] = {W25Q80BV_CHIP_ERASE};
     spiSelect(&SPID1);
-    // spiSend(&SPID1, 1, write_enable_data);
-    // spiSend(&SPID1, 1, erase_data);
+    spiSend(&SPID1, 1, write_enable_data);
+    spiSend(&SPID1, 1, erase_data);
     spiUnselect(&SPID1);
 }
 }
-}
-}
-
-
 
 
 

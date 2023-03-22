@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 Jared Boone, ShareBrained Technology, Inc.
- * Copyright (C) 2016 Furrtek
+ * Copyright (C) 2023 Bernd Herzog
  *
  * This file is part of PortaPack.
  *
@@ -40,8 +40,6 @@ FlashUtilityView::~FlashUtilityView() {
 }
 
 void FlashUtilityView::focus() {
-	BlockDeviceInfo block_device_info;
-	
 	dummy.focus();
 	
 	if (!confirmed) {
@@ -51,12 +49,22 @@ void FlashUtilityView::focus() {
 			}
 		);
 	} else {
-		if (sdcGetInfo(&SDCD1, &block_device_info) == CH_SUCCESS) {
-			thread = chThdCreateFromHeap(NULL, 2048, NORMALPRIO, FlashUtilityView::static_fn, this);
-		} else {
-			nav_.pop();		// Just silently abort for now
-		}
+		thread = chThdCreateFromHeap(NULL, 2048, NORMALPRIO, FlashUtilityView::static_fn, this);
 	}
 }
+
+void FlashUtilityView::run(){
+		const int count = 16;
+		progress.set_max(count);
+
+		for (uint32_t i = 0; i < count; i++) {
+			progress.set_value(i);
+			chThdSleepMilliseconds(20);
+		}
+
+		baseband::run_image(portapack::spi_flash::image_tag_flash_utility);
+		m0_halt();
+		/* m0_halt never returns */
+	}
 
 } /* namespace ui */

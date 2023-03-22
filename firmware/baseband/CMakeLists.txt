@@ -509,6 +509,7 @@ DeclareTargets(PWFM wfm_audio)
 
 set(MODE_CPPSRC
 	proc_flash_utility.cpp
+	w25q80bv.cpp
 )
 DeclareTargets(PFUT flash_utility)
 

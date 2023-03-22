@@ -23,13 +23,13 @@
 #ifndef __W25Q80BV_H__
 #define __W25Q80BV_H__
 
+#include "ch.h"
+#include "hal.h"
 
-namespace portapack {
-namespace hw {
+#include "hackrf_gpio.hpp"
+
 namespace w25q80bv {
 void erase();
-}
-}
 }
 
 #endif/*__W25Q80BV_H__*/
