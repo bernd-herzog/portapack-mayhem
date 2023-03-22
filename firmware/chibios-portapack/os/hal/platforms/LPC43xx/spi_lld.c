@@ -208,6 +208,7 @@ static void spi_serve_interrupt(SPIDriver *spip) {
  * @notapi
  */
 void spi_lld_init(void) {
+#if defined(LPC43XX_M0)  
 
 #if LPC_SPI_USE_SSP0
   spiObjectInit(&SPID1);
@@ -220,6 +221,8 @@ void spi_lld_init(void) {
   SPID2.ssp = LPC_SSP1;
   SPID2.resources = &ssp1_resources;
 #endif /* LPC_SPI_USE_SSP0 */
+
+#endif /* LPC43XX_M0 */
 }
 
 /**
