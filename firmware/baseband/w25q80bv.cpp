@@ -22,12 +22,6 @@
 //
 
 
-// from hackrf/firmware/libopencm3/include/libopencm3/lpc43xx/rgu.h
-#define MMIO32(addr)		(*(volatile uint32_t *)(addr))
-#define RGU_BASE                        0x40053000
-#define RESET_CTRL1                     MMIO32(RGU_BASE + 0x104)
-#define RESET_CTRL1_SPIFI_RST_SHIFT (21)
-#define RESET_CTRL1_SPIFI_RST (1 << RESET_CTRL1_SPIFI_RST_SHIFT)
 
 
 
@@ -41,42 +35,39 @@
 //   48
 // };
 
-static constexpr uint32_t ssp0_cpsr = 2;
-//constexpr ClockFrequency ssp0_pclk_f = base_m4_clk_f;
-//constexpr ClockFrequency w25q80bv_spi_f = 20000000U;
-
-static constexpr SPIConfig ssp_config_w25q80bv = {
-	.end_cb = NULL,
-	.ssport = hackrf::one::gpio_w25q80bv_select.port(),
-	.sspad = hackrf::one::gpio_w25q80bv_select.pad(),
-	.cr0 =
-		  CR0_CLOCKRATE(ssp0_cpsr)
-		| CR0_DSS8BIT
-		,
-	.cpsr = ssp0_cpsr,
-};
 
 
 #define W25Q80BV_WRITE_ENABLE 0x06
 #define W25Q80BV_CHIP_ERASE   0xC7
+#define W25Q80BV_DEVICE_ID    0xAB
 
 namespace w25q80bv {
-void erase() {
 
-	// disable SPIFI
-	RESET_CTRL1 = RESET_CTRL1_SPIFI_RST;
-
-	//start SPI driver
-	spiStart(&SPID1, &ssp_config_w25q80bv);
-
+void remove_write_protection() {
 	//remove hardware write protection
 	hackrf::one::gpio_w25q80bv_hold.set();
 	hackrf::one::gpio_w25q80bv_wp.set();
 	hackrf::one::gpio_w25q80bv_hold.output();
 	hackrf::one::gpio_w25q80bv_wp.output();
+}
+
+uint8_t get_device_id(){
+	uint8_t data[] = {W25Q80BV_DEVICE_ID};
+    spiSelect(&SPID1);
+    spiSend(&SPID1, 1, data);
+	spiReceive(&SPID1, 1, data);
+    spiUnselect(&SPID1);
+	return data[0];
+}
+
+void erase_chip() {
+
+
 
  	static uint8_t write_enable_data[] = {W25Q80BV_WRITE_ENABLE};
 	static uint8_t erase_data[] = {W25Q80BV_CHIP_ERASE};
+	uint8_t data[] = {W25Q80BV_DEVICE_ID, 0xFF, 0xFF, 0xFF, 0xFF};
+
     spiSelect(&SPID1);
     spiSend(&SPID1, 1, write_enable_data);
     spiSend(&SPID1, 1, erase_data);

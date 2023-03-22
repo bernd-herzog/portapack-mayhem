@@ -29,7 +29,9 @@
 #include "hackrf_gpio.hpp"
 
 namespace w25q80bv {
-void erase();
+    void remove_write_protection();
+    uint8_t get_device_id();
+    void erase_chip();
 }
 
 #endif/*__W25Q80BV_H__*/
