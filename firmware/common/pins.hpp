@@ -30,7 +30,7 @@ enum Pins {
 	P0_0, P0_1,
 	P1_0, P1_1, P1_2, P1_3, P1_4, P1_5, P1_6, P1_7, P1_8, P1_9, P1_10, P1_11, P1_12, P1_13, P1_14, P1_15, P1_16, P1_17, P1_18, P1_19, P1_20,
 	P2_0, P2_1, P2_2, P2_3, P2_4, P2_5, P2_6, P2_7, P2_8, P2_9, P2_10, P2_11, P2_12, P2_13,
-	P3_0, P3_1, P3_2, P3_4, P3_5, P3_8,
+	P3_0, P3_1, P3_2,
 	P4_0, P4_1, P4_2, P4_3, P4_4, P4_5, P4_6, P4_7, P4_8, P4_9, P4_10,
 	P5_0, P5_1, P5_2, P5_3, P5_4, P5_5, P5_6, P5_7,
 	P6_0, P6_1, P6_2, P6_3, P6_4, P6_5, P6_6, P6_7, P6_8, P6_9, P6_10, P6_11, P6_12,
@@ -81,9 +81,6 @@ constexpr Pin pins[] {
 	[P3_0]  = {  3,  0},
 	[P3_1]  = {  3,  1},
 	[P3_2]  = {  3,  2},
-	[P3_4]  = {  3,  4},
-	[P3_5]  = {  3,  5},
-	[P3_8]  = {  3,  8},
 	[P4_0]  = {  4,  0},
 	[P4_1]  = {  4,  1},
 	[P4_2]  = {  4,  2},
@@ -133,11 +130,11 @@ constexpr Pin pins[] {
 
 enum GPIOs {
 	GPIO0_0, GPIO0_1, GPIO0_2, GPIO0_3, GPIO0_4, GPIO0_5, /*GPIO0_6,*/ GPIO0_7, GPIO0_8, GPIO0_9, GPIO0_10, GPIO0_11, GPIO0_12, GPIO0_13, GPIO0_14, GPIO0_15,
-	GPIO1_0, GPIO1_1, GPIO1_2, GPIO1_3, GPIO1_4, GPIO1_5, GPIO1_6, GPIO1_7, GPIO1_8, GPIO1_9, GPIO1_10, GPIO1_11, GPIO1_12, GPIO1_13, GPIO1_14, GPIO1_15,
+	GPIO1_0, GPIO1_1, GPIO1_2, GPIO1_3, GPIO1_4, GPIO1_5, GPIO1_6, GPIO1_7, GPIO1_8, GPIO1_9, GPIO1_10, GPIO1_11, GPIO1_12, GPIO1_13, /*GPIO1_14, GPIO1_15,*/
 	GPIO2_0, GPIO2_1, GPIO2_2, GPIO2_3, GPIO2_4, GPIO2_5, GPIO2_6, GPIO2_7, GPIO2_8, GPIO2_9, GPIO2_10, GPIO2_11, GPIO2_12, GPIO2_13, GPIO2_14, GPIO2_15,
 	GPIO3_0, GPIO3_1, GPIO3_2, GPIO3_3, GPIO3_4, GPIO3_5, GPIO3_6, GPIO3_7, GPIO3_8, GPIO3_9, GPIO3_10, GPIO3_11, GPIO3_12, GPIO3_13, GPIO3_14, GPIO3_15,
 	GPIO4_11,
-	GPIO5_0, GPIO5_1, GPIO5_2, GPIO5_3, GPIO5_4, GPIO5_5, GPIO5_6, GPIO5_7, GPIO5_8, GPIO5_9, /*GPIO5_10,*/ GPIO5_11, GPIO5_12, GPIO5_13, GPIO5_14, GPIO5_15, GPIO5_16, GPIO5_18,
+	GPIO5_0, GPIO5_1, GPIO5_2, GPIO5_3, GPIO5_4, GPIO5_5, GPIO5_6, GPIO5_7, GPIO5_8, GPIO5_9, /*GPIO5_10, GPIO5_11,*/ GPIO5_12, GPIO5_13, GPIO5_14, GPIO5_15, GPIO5_16, GPIO5_18,
 };
 
 constexpr GPIO gpio[] = {
@@ -172,8 +169,8 @@ constexpr GPIO gpio[] = {
 	[GPIO1_11] = { pins[P2_11], 1, 11, 0 },
 	[GPIO1_12] = { pins[P2_12], 1, 12, 0 },
 	[GPIO1_13] = { pins[P2_13], 1, 13, 0 },
-	[GPIO1_14] = { pins[P3_4],  1, 14, 0 },
-	[GPIO1_15] = { pins[P3_5],  1, 15, 0 },
+	//[GPIO1_14] = { pins[P3_4],  1, 14, 0 },
+	//[GPIO1_15] = { pins[P3_5],  1, 15, 0 },
 
 	[GPIO2_0]  = { pins[P4_0],  2,  0, 0 },
 	[GPIO2_1]  = { pins[P4_1],  2,  1, 0 },
@@ -222,7 +219,7 @@ constexpr GPIO gpio[] = {
 	[GPIO5_8]  = { pins[P3_1],  5,  8, 4 },
 	[GPIO5_9]  = { pins[P3_2],  5,  9, 4 },
 	//[GPIO5_10] = { pins[P3_7],  5, 10, 4 },
-	[GPIO5_11] = { pins[P3_8],  5, 11, 4 },
+	//[GPIO5_11] = { pins[P3_8],  5, 11, 4 },
 	[GPIO5_12] = { pins[P4_8],  5, 12, 4 },
 	[GPIO5_13] = { pins[P4_9],  5, 13, 4 },
 	[GPIO5_14] = { pins[P4_10], 5, 14, 4 },
