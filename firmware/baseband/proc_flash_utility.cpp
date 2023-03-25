@@ -11,7 +11,7 @@ int main() {
 	w25q80bv::initialite_spi();
 	w25q80bv::setup();
 	w25q80bv::remove_write_protection();
-	//w25q80bv::erase_chip();
+	w25q80bv::erase_chip();
 
 	const TCHAR *filename = reinterpret_cast<const TCHAR *>(&shared_memory.bb_data.data[0]);
 
@@ -21,21 +21,6 @@ int main() {
 	if (connect == CH_FAILED) {
 		HALT_UNTIL_DEBUGGING();
 	}
-
-	// while (true) {
-	// 	volatile bool_t connect = sdcConnect(&SDCD1);
-
-	// 	if (connect == CH_FAILED){
-	// 		sdcDisconnect(&SDCD1);
-	// 		sdcStop(&SDCD1);
-	// 		//HALT_IF_DEBUGGING();
-	// 		sdcStart(&SDCD1, nullptr);
-	// 		continue;
-	// 	}
-	// 	else {
-	// 		break;
-	// 	}
-	// }
 
 	FATFS fs;
 	

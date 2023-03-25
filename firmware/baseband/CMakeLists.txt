@@ -90,8 +90,6 @@ set(CSRC
 	${PORTSRC}
 	${KERNSRC}
 	${TESTSRC}
-	${HALSRC}
-	${PLATFORMSRC}
 	${BOARDSRC}
 )
 
@@ -262,9 +260,10 @@ macro(DeclareTargets chunk_tag name)
 	project("baseband_${name}")
 
 	include(${RULESPATH}/rules.cmake)
-	add_executable(${PROJECT_NAME}.elf $<TARGET_OBJECTS:baseband_shared> ${MODE_CPPSRC})
+	add_executable(${PROJECT_NAME}.elf $<TARGET_OBJECTS:baseband_shared> ${MODE_CPPSRC} ${HALSRC} ${PLATFORMSRC})
 	set_target_properties(${PROJECT_NAME}.elf PROPERTIES LINK_DEPENDS ${LDSCRIPT})
 	add_definitions(${DEFS})
+	target_compile_definitions(${PROJECT_NAME}.elf PUBLIC "-DBASEBAND_${name}")
 	include_directories(. ${INCDIR} ${MODE_INCDIR})
 	link_directories(${LLIBDIR})
 	target_link_libraries(${PROJECT_NAME}.elf ${LIBS})
@@ -508,7 +507,7 @@ DeclareTargets(PWFM wfm_audio)
 ### Flash Utility
 include(${CHIBIOS_PORTAPACK}/os/various/fatfs_bindings/fatfs.cmake)
 #HAL_USE_SDC
-set(UDEFS "-DHAL_USE_SDC")
+#set(UDEFS "-DHAL_USE_SDC")
 set(MODE_INCDIR ${FATFSINC})
 set(MODE_CPPSRC
 	proc_flash_utility.cpp
