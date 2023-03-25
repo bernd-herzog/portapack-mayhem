@@ -56,19 +56,28 @@ private:
 	
 	void run();
 
-	Text text_info {
-		{ 10 * 8, 16 * 8, 10 * 8, 16 },
-		"Working..."
+	Labels labels {
+		{ { 0, 0 }, "Select image:", Color::white() }
 	};
+
+	MenuView menu_view {
+		{ 0, 2 * 8, 240, 26 * 8 },
+		true
+	};
+
+	// Text text_info {
+	// 	{ 10 * 8, 16 * 8, 10 * 8, 16 },
+	// 	"Working..."
+	// };
 	
-	ProgressBar progress {
-		{ 2 * 8, 19 * 8, 26 * 8, 24 }
-	};
+	// ProgressBar progress {
+	// 	{ 2 * 8, 19 * 8, 26 * 8, 24 }
+	// };
 	
-	Button dummy {
-		{ 240, 0, 0, 0 },
-		""
-	};
+	// Button dummy {
+	// 	{ 240, 0, 0, 0 },
+	// 	""
+	// };
 };
 
 } /* namespace ui */
