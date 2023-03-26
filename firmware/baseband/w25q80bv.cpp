@@ -21,6 +21,20 @@ void initialite_spi(){
 	SSP_CR1(SSP0_BASE) = SSP_ENABLE;
 }
 
+
+void reset_status() {
+	while (get_status() & W25Q80BV_STATUS_BUSY) {HALT_IF_DEBUGGING();}
+
+	uint8_t data[] = {0x01, 0x00, 0x00};
+	palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+
+	for (size_t j = 0; j < 1; j++) {
+		data[j] = spi_ssp_transfer_word(data[j]);
+	}
+
+ 	palSetPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+}
+
 void setup() {
 	/* Init SPIFI GPIO to Normal GPIO */
 
@@ -54,7 +68,41 @@ void setup() {
 	/* Set GPIO pins as outputs. */
 	palOutputPad(W25Q80BV_HOLD_PORT, W25Q80BV_HOLD_PAD);
 	palOutputPad(W25Q80BV_WP_PORT, W25Q80BV_WP_PAD);
+}
 
+void power_down() {
+	uint8_t data[] = {0xB9};
+	palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+
+	for (size_t j = 0; j < 1; j++) {
+		data[j] = spi_ssp_transfer_word(data[j]);
+	}
+
+ 	palSetPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+}
+
+void reset() {
+	RESET_CTRL1 = RESET_CTRL1_SPIFI_RST;
+
+	const uint32_t clock_prescale_rate = 2;
+	const uint32_t serial_clock_rate = 2;
+
+	SSP_CR1(SSP0_BASE) = 0;
+	SSP_CPSR(SSP0_BASE) = clock_prescale_rate;
+	SSP_CR0(SSP0_BASE) = (serial_clock_rate << 8) | SSP_DATA_8BITS;
+	SSP_CR1(SSP0_BASE) = SSP_ENABLE;
+
+	palSetPad(W25Q80BV_HOLD_PORT, W25Q80BV_HOLD_PAD);
+	palSetPad(W25Q80BV_WP_PORT, W25Q80BV_WP_PAD);
+	palSetPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+
+	/* Set GPIO pins as outputs. */
+	palOutputPad(W25Q80BV_HOLD_PORT, W25Q80BV_HOLD_PAD);
+	palOutputPad(W25Q80BV_WP_PORT, W25Q80BV_WP_PAD);
+	palOutputPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+}
+
+void wait_for_device() {
 	uint8_t device_id;
 	do {
 		device_id = get_device_id();
@@ -62,10 +110,12 @@ void setup() {
 		 device_id != W25Q16DV_DEVICE_ID_RES);
 }
 
-void remove_write_protection() {
+void wait_not_busy() {
 	while (get_status() & W25Q80BV_STATUS_BUSY) {HALT_IF_DEBUGGING();}
+}
 
- 	static uint8_t data[] = {W25Q80BV_WRITE_ENABLE};
+void remove_write_protection() {
+	uint8_t data[] = {W25Q80BV_WRITE_ENABLE};
 	palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
 
 	for (size_t j = 0; j < 1; j++) {
@@ -77,8 +127,22 @@ void remove_write_protection() {
 	while (!(get_status() & W25Q80BV_STATUS_WEL)) {HALT_IF_DEBUGGING();}
 }
 
-uint32_t spi_ssp_transfer_word(const uint32_t data)
-{
+void remove_write_disable() {
+	//palClearPad(W25Q80BV_HOLD_PORT, W25Q80BV_HOLD_PAD);
+	palClearPad(W25Q80BV_WP_PORT, W25Q80BV_WP_PAD);
+	//palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+
+	// static uint8_t data[] = {0x04};
+	// palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+
+	// for (size_t j = 0; j < 1; j++) {
+	// 	data[j] = spi_ssp_transfer_word(data[j]);
+	// }
+
+	// palSetPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+}
+
+uint32_t spi_ssp_transfer_word(const uint32_t data) {
 	while ((SSP_SR(SSP0_BASE) & SSP_SR_TNF) == 0) {HALT_IF_DEBUGGING();}
 	SSP_DR(SSP0_BASE) = data;
 	while (SSP_SR(SSP0_BASE) & SSP_SR_BSY) {HALT_IF_DEBUGGING();}
@@ -88,6 +152,19 @@ uint32_t spi_ssp_transfer_word(const uint32_t data)
 
 uint8_t get_status() {
 	uint8_t data[] = {W25Q80BV_READ_STATUS1, 0xFF};
+	palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+
+	for (size_t j = 0; j < 2; j++) {
+		data[j] = spi_ssp_transfer_word(data[j]);
+	}
+
+ 	palSetPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+
+	return data[1];
+}
+
+uint8_t get_status2() {
+	uint8_t data[] = {W25Q80BV_READ_STATUS2, 0xFF};
 	palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
 
 	for (size_t j = 0; j < 2; j++) {
@@ -113,13 +190,47 @@ uint8_t get_device_id() {
 }
 
 void erase_chip() {
-	static uint8_t data[] = {W25Q80BV_CHIP_ERASE};
+	uint8_t data[] = {W25Q80BV_CHIP_ERASE};
 	palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
 
 	for (size_t j = 0; j < 1; j++) {
 		data[j] = spi_ssp_transfer_word(data[j]);
 	}
 
+	palSetPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+}
+
+void write(size_t page_index, uint8_t *data_buffer, size_t length) {
+
+	//while (get_status() & W25Q80BV_STATUS_BUSY) {HALT_IF_DEBUGGING();}
+	// disable_spifi();
+	// initialite_spi();
+	
+	//wait_for_device();
+
+	//if (!(get_status() & W25Q80BV_STATUS_WEL))
+	//remove_write_protection();
+
+	//while (!(get_status() & W25Q80BV_STATUS_WEL)) {HALT_IF_DEBUGGING();}
+	while (get_status() & W25Q80BV_STATUS_BUSY) {HALT_IF_DEBUGGING();}
+
+	size_t page_len = 256U;
+	size_t addr = page_index * page_len;
+	uint8_t header[] = {
+		W25Q80BV_PAGE_PROGRAM,
+		(uint8_t)((addr & 0xFF0000) >> 16),
+		(uint8_t)((addr & 0xFF00) >> 8),
+		(uint8_t)(addr & 0xFF)
+	};
+
+	palClearPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
+	for (size_t j = 0; j < 4; j++) {
+		header[j] = spi_ssp_transfer_word(header[j]);
+	}
+
+	for (size_t j = 0; j < length; j++) {
+		data_buffer[j] = spi_ssp_transfer_word(data_buffer[j]);
+	}
 	palSetPad(W25Q80BV_SELECT_PORT, W25Q80BV_SELECT_PAD);
 }
 }

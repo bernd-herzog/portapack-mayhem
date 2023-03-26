@@ -34,6 +34,7 @@
 #define W25Q80BV_WRITE_ENABLE 0x06
 #define W25Q80BV_CHIP_ERASE   0xC7
 #define W25Q80BV_DEVICE_ID    0xAB
+#define W25Q80BV_PAGE_PROGRAM 0x02
 
 #define PERIPH_BASE_APB0 0x40080000
 #define SCU_BASE (PERIPH_BASE_APB0 + 0x06000)
@@ -94,6 +95,7 @@
 #define palSetPad(port, pad) (LPC_GPIO->SET[(port)] = 1 << (pad))
 #define palClearPad(port, pad) (LPC_GPIO->CLR[(port)] = 1 << (pad))
 #define palOutputPad(port, pad) (LPC_GPIO->DIR[(port)] |= 1 << (pad))
+#define palTogglePad(port, pad) (LPC_GPIO->NOT[(port)] |= 1 << (pad))
 
 #define W25Q80BV_SELECT_PORT 5
 #define W25Q80BV_SELECT_PAD 11
@@ -105,6 +107,7 @@
 #define W25Q80BV_STATUS_BUSY 0x01
 #define W25Q80BV_STATUS_WEL  0x02
 #define W25Q80BV_READ_STATUS1 0x05
+#define W25Q80BV_READ_STATUS2 0x35
 
 #define PERIPH_BASE_APB0                0x40080000
 #define SSP0_BASE                       (PERIPH_BASE_APB0 + 0x03000)
@@ -118,12 +121,20 @@
 namespace w25q80bv {
     void disable_spifi();
     uint8_t get_status();
+    uint8_t get_status2();
+    void reset_status();
+    void wait_for_device();
+    void wait_not_busy();
+    void power_down();
     uint32_t spi_ssp_transfer_word(const uint32_t data);
     void initialite_spi();
     void setup();
+    void reset();
     void remove_write_protection();
+    void remove_write_disable();
     uint8_t get_device_id();
     void erase_chip();
+    void write(size_t page_index, uint8_t *data_buffer, size_t length);
 }
 
 #endif/*__W25Q80BV_H__*/
