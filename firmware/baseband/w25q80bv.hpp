@@ -104,6 +104,11 @@
 #define W25Q80BV_HOLD_PORT 1
 #define W25Q80BV_HOLD_PAD 14
 
+#define LED_PORT 2
+#define LEDRX_PAD 2
+#define LEDTX_PAD 8
+
+
 #define W25Q80BV_STATUS_BUSY 0x01
 #define W25Q80BV_STATUS_WEL  0x02
 #define W25Q80BV_READ_STATUS1 0x05
@@ -121,17 +126,12 @@
 namespace w25q80bv {
     void disable_spifi();
     uint8_t get_status();
-    uint8_t get_status2();
-    void reset_status();
     void wait_for_device();
     void wait_not_busy();
-    void power_down();
     uint32_t spi_ssp_transfer_word(const uint32_t data);
     void initialite_spi();
     void setup();
-    void reset();
     void remove_write_protection();
-    void remove_write_disable();
     uint8_t get_device_id();
     void erase_chip();
     void write(size_t page_index, uint8_t *data_buffer, size_t length);

@@ -1,3 +1,25 @@
+/*
+ * Copyright (C) 2015 Jared Boone, ShareBrained Technology, Inc.
+ * Copyright (C) 2023 Bernd Herzog
+ *
+ * This file is part of PortaPack.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
+ */
+
 #include "ch.h"
 #include "hal.h"
 #include "ff.h"
@@ -8,6 +30,10 @@
 
 #include "portapack_shared_memory.hpp"
 
+#define SCB_AIRCR_VECTKEYSTAT_LSB	16
+#define SCB_AIRCR_VECTKEY		(0x05FA << SCB_AIRCR_VECTKEYSTAT_LSB)
+#define SCB_AIRCR_SYSRESETREQ			(1 << 2)
+
 int main() {
 	w25q80bv::disable_spifi();
 	w25q80bv::initialite_spi();
@@ -16,46 +42,14 @@ int main() {
 	w25q80bv::wait_for_device();
 	w25q80bv::wait_not_busy();
 	
-	//w25q80bv::reset_status();
-
-	palTogglePad(2, 2);
+	palTogglePad(LED_PORT, LEDRX_PAD);
 	w25q80bv::remove_write_protection();
 	w25q80bv::wait_not_busy();
 
 	w25q80bv::erase_chip();
 	w25q80bv::wait_not_busy();
 
-	/*  -------------------  */
-	//w25q80bv::remove_write_protection();
-	//w25q80bv::wait_not_busy();
-
-
-	// w25q80bv::power_down();
-
-	// w25q80bv::remove_write_disable();
-	// chThdSleepMilliseconds(100);
-
-	// w25q80bv::disable_spifi();
-	// w25q80bv::initialite_spi();
-	// w25q80bv::setup();
-	// w25q80bv::reset();
-	// w25q80bv::wait_for_device();
-
-	//w25q80bv::wait_not_busy();
-	// w25q80bv::remove_write_disable();
-	// w25q80bv::wait_not_busy();
-	// w25q80bv::wait_for_device();
-	// w25q80bv::wait_not_busy();
-	// w25q80bv::remove_write_protection();
-	// w25q80bv::wait_not_busy();
-	
-	// volatile uint8_t status = w25q80bv::get_status();
-	// volatile uint8_t status2 = w25q80bv::get_status2();
-	// HALT_UNTIL_DEBUGGING();
-
-	/*  -------------------  */
-
-	palTogglePad(2, 2);
+	palTogglePad(LED_PORT, LEDRX_PAD);
 
 	const TCHAR *filename = reinterpret_cast<const TCHAR *>(&shared_memory.bb_data.data[0]);
 
@@ -63,92 +57,64 @@ int main() {
 
 	bool_t connect = sdcConnect(&SDCD1);
 	if (connect == CH_FAILED) {
-		HALT_UNTIL_DEBUGGING();
+		chDbgPanic("no sd card #1");
 	}
 
 	FATFS fs;
 	
 	volatile FRESULT mount_result = f_mount(&fs, reinterpret_cast<const TCHAR*>(_T("")), 1);
 	if (mount_result != FR_OK) {
-		HALT_UNTIL_DEBUGGING();
+		chDbgPanic("no sd card #2");
 	}
 
 	FIL fil;
 	FRESULT res = f_open(&fil, filename, FA_READ);
+	if (res != FR_OK) {
+		chDbgPanic("no file");
+	}
+
 	uint8_t *data_buffer = &shared_memory.bb_data.data[0];
 	size_t page_len = 256U;
 	size_t num_pages = 4096U;
+	UINT bytes_read;
+	palSetPad(LED_PORT, LEDTX_PAD);
 
-	if (res == FR_OK) {
+	for (size_t page_index = 0; page_index < num_pages; page_index++){
 		
-		UINT bytes_read;
-		palSetPad(2, 8);
+		if (page_index % 32 == 0)
+			palTogglePad(LED_PORT, LEDRX_PAD);
 
-		for (size_t page_index = 0; page_index < num_pages; page_index++){
-			
-			//hackrf::one::led_rx.toggle();
-			if (page_index % 32 == 0)
-				palTogglePad(2, 2);
+		FRESULT read_status = f_read(&fil, data_buffer, page_len, &bytes_read);
 
-			FRESULT read_status = f_read(&fil, data_buffer, page_len, &bytes_read);
-
-			if (read_status != FR_OK) {
-				HALT_UNTIL_DEBUGGING();
-			}
-
-			if (bytes_read == 0) {
-				break;
-			}
-
-			if (bytes_read == page_len) {
-				//chThdSleepMilliseconds(100);
-				// w25q80bv::disable_spifi();
-				// w25q80bv::initialite_spi();
-				// w25q80bv::setup();
-
-				// w25q80bv::wait_for_device();
-				w25q80bv::wait_not_busy();
-				//chThdSleepMilliseconds(100);
-
-				w25q80bv::remove_write_protection();
-				w25q80bv::wait_not_busy();
-				w25q80bv::write(page_index, data_buffer, bytes_read);
-				w25q80bv::wait_not_busy();
-
-			} else if (bytes_read < page_len) {
-				// w25q80bv::disable_spifi();
-				// w25q80bv::initialite_spi();
-				// w25q80bv::setup();
-
-				// w25q80bv::wait_for_device();
-				w25q80bv::wait_not_busy();
-				w25q80bv::remove_write_protection();
-				w25q80bv::wait_not_busy();
-				w25q80bv::write(page_index, data_buffer, bytes_read);
-				w25q80bv::wait_not_busy();
-				break;
-			}
-
+		if (read_status != FR_OK) {
+			chDbgPanic("no data");
 		}
 
-		palClearPad(2,2);
-		palClearPad(2,8);
-		HALT_UNTIL_DEBUGGING();
-
-		FRESULT close_result = f_close(&fil);
-		if (close_result != FR_OK) {
-			HALT_UNTIL_DEBUGGING();
+		if (bytes_read == 0) {
+			break;
 		}
 
+		if (bytes_read == page_len) {
+			w25q80bv::wait_not_busy();
+			w25q80bv::remove_write_protection();
+			w25q80bv::wait_not_busy();
+			w25q80bv::write(page_index, data_buffer, bytes_read);
+			w25q80bv::wait_not_busy();
+
+		} else if (bytes_read < page_len) {
+			w25q80bv::wait_not_busy();
+			w25q80bv::remove_write_protection();
+			w25q80bv::wait_not_busy();
+			w25q80bv::write(page_index, data_buffer, bytes_read);
+			w25q80bv::wait_not_busy();
+			break;
+		}
 	}
-	else {
-		HALT_UNTIL_DEBUGGING();
-		f_close(&fil);	
-	}
 
+	palClearPad(LED_PORT, LEDRX_PAD);
+	palClearPad(LED_PORT, LEDTX_PAD);
 
-	//runtime_error(hackrf::one::led_rx);
-
+	f_close(&fil);
 
 	return 0;
 }
