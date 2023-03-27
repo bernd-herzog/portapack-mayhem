@@ -25,14 +25,8 @@
 #include "ff.h"
 
 #include "w25q80bv.hpp"
-
 #include "debug.hpp"
-
 #include "portapack_shared_memory.hpp"
-
-#define SCB_AIRCR_VECTKEYSTAT_LSB	16
-#define SCB_AIRCR_VECTKEY		(0x05FA << SCB_AIRCR_VECTKEYSTAT_LSB)
-#define SCB_AIRCR_SYSRESETREQ			(1 << 2)
 
 int main() {
 	w25q80bv::disable_spifi();
@@ -115,6 +109,10 @@ int main() {
 	palClearPad(LED_PORT, LEDTX_PAD);
 
 	f_close(&fil);
+
+	while(1) {
+		__WFE();
+	}
 
 	return 0;
 }
