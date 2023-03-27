@@ -26,6 +26,7 @@
 namespace ui {
 
 Thread* FlashUtilityView::thread { nullptr };
+static constexpr size_t max_filename_length = 26;
 
 FlashUtilityView::FlashUtilityView(NavigationView& nav) : nav_ (nav) {
 	add_children({
@@ -39,7 +40,7 @@ FlashUtilityView::FlashUtilityView(NavigationView& nav) : nav_ (nav) {
 		auto path = entry.path().native();
 
 		menu_view.add_item({
-			filename.string(),
+			filename.string().substr(0, max_filename_length),
 			ui::Color::red(),
 			&bitmap_icon_temperature,
 			[this, path]() {
