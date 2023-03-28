@@ -28,91 +28,89 @@
 #include "debug.hpp"
 #include "portapack_shared_memory.hpp"
 
+#define PAGE_LEN 256U
+#define NUM_PAGES 4096U
+
+void initialize_flash();
+void erase_flash();
+void initialize_sdcard();
+void write_firmware(FIL *);
+void write_page(size_t, uint8_t *, size_t);
+
 int main() {
+	const TCHAR *filename = reinterpret_cast<const TCHAR *>(&shared_memory.bb_data.data[0]);
+
+	initialize_flash();
+	palSetPad(LED_PORT, LEDRX_PAD);
+	erase_flash();
+
+	initialize_sdcard();
+
+	FIL firmware_file;
+	if (f_open(&firmware_file, filename, FA_READ) != FR_OK) chDbgPanic("no file");
+
+	palSetPad(LED_PORT, LEDTX_PAD);
+
+	write_firmware(&firmware_file);
+
+	palClearPad(LED_PORT, LEDTX_PAD);
+	palClearPad(LED_PORT, LEDRX_PAD);
+
+	f_close(&firmware_file);
+
+	while(1)
+		__WFE();
+
+	return 0;
+}
+
+void initialize_flash() {
 	w25q80bv::disable_spifi();
 	w25q80bv::initialite_spi();
 	w25q80bv::setup();
 
 	w25q80bv::wait_for_device();
 	w25q80bv::wait_not_busy();
-	
-	palTogglePad(LED_PORT, LEDRX_PAD);
+}
+
+void erase_flash() {
 	w25q80bv::remove_write_protection();
 	w25q80bv::wait_not_busy();
 
 	w25q80bv::erase_chip();
 	w25q80bv::wait_not_busy();
+}
 
-	palTogglePad(LED_PORT, LEDRX_PAD);
-
-	const TCHAR *filename = reinterpret_cast<const TCHAR *>(&shared_memory.bb_data.data[0]);
+void initialize_sdcard() {
+	static FATFS fs;
 
 	sdcStart(&SDCD1, nullptr);
+	if (sdcConnect(&SDCD1) == CH_FAILED) chDbgPanic("no sd card #1");
+	if (f_mount(&fs, reinterpret_cast<const TCHAR*>(_T("")), 1) != FR_OK) chDbgPanic("no sd card #2");
+}
 
-	bool_t connect = sdcConnect(&SDCD1);
-	if (connect == CH_FAILED) {
-		chDbgPanic("no sd card #1");
-	}
-
-	FATFS fs;
-	
-	volatile FRESULT mount_result = f_mount(&fs, reinterpret_cast<const TCHAR*>(_T("")), 1);
-	if (mount_result != FR_OK) {
-		chDbgPanic("no sd card #2");
-	}
-
-	FIL fil;
-	FRESULT res = f_open(&fil, filename, FA_READ);
-	if (res != FR_OK) {
-		chDbgPanic("no file");
-	}
-
+void write_firmware(FIL *firmware_file) {
 	uint8_t *data_buffer = &shared_memory.bb_data.data[0];
-	size_t page_len = 256U;
-	size_t num_pages = 4096U;
-	UINT bytes_read;
-	palSetPad(LED_PORT, LEDTX_PAD);
 
-	for (size_t page_index = 0; page_index < num_pages; page_index++){
-		
+	for (size_t page_index = 0; page_index < NUM_PAGES; page_index++) {
 		if (page_index % 32 == 0)
-			palTogglePad(LED_PORT, LEDRX_PAD);
+			palTogglePad(LED_PORT, LEDTX_PAD);
 
-		FRESULT read_status = f_read(&fil, data_buffer, page_len, &bytes_read);
+		size_t bytes_read;
+		if (f_read(firmware_file, data_buffer, PAGE_LEN, &bytes_read) != FR_OK) chDbgPanic("no data");
 
-		if (read_status != FR_OK) {
-			chDbgPanic("no data");
-		}
+		if (bytes_read > 0)
+			write_page(page_index, data_buffer, bytes_read);
 
-		if (bytes_read == 0) {
-			break;
-		}
-
-		if (bytes_read == page_len) {
-			w25q80bv::wait_not_busy();
-			w25q80bv::remove_write_protection();
-			w25q80bv::wait_not_busy();
-			w25q80bv::write(page_index, data_buffer, bytes_read);
-			w25q80bv::wait_not_busy();
-
-		} else if (bytes_read < page_len) {
-			w25q80bv::wait_not_busy();
-			w25q80bv::remove_write_protection();
-			w25q80bv::wait_not_busy();
-			w25q80bv::write(page_index, data_buffer, bytes_read);
-			w25q80bv::wait_not_busy();
-			break;
-		}
+		if (bytes_read < PAGE_LEN)
+			return;
 	}
+}
 
-	palClearPad(LED_PORT, LEDRX_PAD);
-	palClearPad(LED_PORT, LEDTX_PAD);
-
-	f_close(&fil);
-
-	while(1) {
-		__WFE();
-	}
-
-	return 0;
+void write_page(size_t page_index, uint8_t *data_buffer, size_t data_length) {
+	w25q80bv::wait_not_busy();
+	w25q80bv::remove_write_protection();
+	w25q80bv::wait_not_busy();
+	w25q80bv::write(page_index, data_buffer, data_length);
+	w25q80bv::wait_not_busy();
 }

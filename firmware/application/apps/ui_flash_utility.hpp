@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 Jared Boone, ShareBrained Technology, Inc.
- * Copyright (C) 2016 Furrtek
+ * Copyright (C) 2023 Bernd Herzog
  *
  * This file is part of PortaPack.
  *
@@ -37,7 +37,7 @@ namespace ui {
 class FlashUtilityView : public View {
 public:
 	FlashUtilityView(NavigationView& nav);
-	~FlashUtilityView();
+
 	void focus() override;
 	
 	std::string title() const override { return "Flash Utility"; };	
@@ -47,17 +47,9 @@ private:
 	
 	bool confirmed = false;
 	static Thread* thread;
-	
-	static msg_t static_fn(void* arg) {
-		auto obj = static_cast<FlashUtilityView*>(arg);
-		obj->run();
-		return 0;
-	}
-	
-	void run();
 
 	Labels labels {
-		{ { 0, 0 }, "Select image:", Color::white() }
+		{ { 4, 4 }, "Select firmware to flash:", Color::white() }
 	};
 
 	MenuView menu_view {
@@ -65,19 +57,8 @@ private:
 		true
 	};
 
-	// Text text_info {
-	// 	{ 10 * 8, 16 * 8, 10 * 8, 16 },
-	// 	"Working..."
-	// };
-	
-	// ProgressBar progress {
-	// 	{ 2 * 8, 19 * 8, 26 * 8, 24 }
-	// };
-	
-	// Button dummy {
-	// 	{ 240, 0, 0, 0 },
-	// 	""
-	// };
+	void firmware_selected(std::filesystem::path::string_type path);
+	void flash_firmware(std::filesystem::path::string_type path);
 };
 
 } /* namespace ui */
