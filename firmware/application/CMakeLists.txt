@@ -268,6 +268,8 @@ set(CPPSRC
 	apps/ui_debug.cpp
 	apps/ui_encoders.cpp
 	apps/ui_fileman.cpp
+	apps/ui_flash_utility.cpp
+	apps/ui_sd_over_usb.cpp
 	apps/ui_freqman.cpp
 	apps/ui_jammer.cpp
 	apps/ui_keyfob.cpp
@@ -353,7 +355,10 @@ set(TCSRC)
 set(TCPPSRC)
 
 # List ASM source files here
-set(ASMSRC ${PORTASM})
+set(ASMSRC
+	${PORTASM}
+	lz4.S
+)
 
 set(INCDIR ${CMAKE_CURRENT_BINARY_DIR} ${COMMON} ${PORTINC} ${KERNINC} ${TESTINC}
 	${HALINC} ${PLATFORMINC} ${BOARDINC}
