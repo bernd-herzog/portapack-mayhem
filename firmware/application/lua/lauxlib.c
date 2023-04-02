@@ -727,6 +727,7 @@ static int l_check_memlimit(lua_State *L, size_t needbytes) {
   return (g->totalbytes >= limit) ? 1 : 0;
 }
 
+#define CHIBIOS_DEFAULT_HEAP 0x00
 
 void chHeapFree(void *p);
 void *chHeapAlloc(void *heapp, size_t size);
@@ -741,11 +742,22 @@ static void lua_ch_free(void *ptr){
 
 
 static void *lua_ch_realloc(void *ptr, size_t osize, size_t nsize){
-  if (ptr == 0)
-    return chHeapAlloc(0x0, nsize);
+  if (ptr == 0){
+    if (nsize == 0)
+      return NULL;
+    return chHeapAlloc(CHIBIOS_DEFAULT_HEAP, nsize);
+  }
   else {
-    void *new_memory = chHeapAlloc(0x0, nsize);
-    memcpy(new_memory, ptr, osize);
+    if (nsize == 0){
+      chHeapFree(ptr);
+      return NULL;
+    }
+
+    void *new_memory = chHeapAlloc(CHIBIOS_DEFAULT_HEAP, nsize);
+
+    if (osize > 0)
+      memcpy(new_memory, ptr, osize > nsize ? nsize : osize);
+
     chHeapFree(ptr);
     return new_memory;
   }

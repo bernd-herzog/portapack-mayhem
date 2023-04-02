@@ -5,10 +5,6 @@
 class LuaBinding {
 public:	
 	LuaBinding();
-	~LuaBinding();
-
-	LuaBinding(const LuaBinding&);
-	LuaBinding& operator=(const LuaBinding&);
 
 	void init();
 	void shutdown();
