@@ -48,6 +48,8 @@ public:
 	LuaView(NavigationView& nav);
 	~LuaView();
 	
+	void focus() override;
+
 	LuaView(const LuaView&) = delete;
 	LuaView(LuaView&&) = delete;
 	LuaView& operator=(const LuaView&) = delete;
@@ -56,17 +58,20 @@ public:
 	std::string title() const override { return "Lua"; };
 
 private:
-	//LuaBinding lua_binding;
-	
 	Labels labels {
 		{ { 0 * 8, 0 * 8 }, "LNA:   VGA:   AMP:", Color::light_grey() }
 	};
-	
-	
+
+	Button button_run {
+		{ 9 * 8, 15 * 16, 12 * 8, 3 * 16 },
+		"Run" 
+	};
+
 	MessageHandlerRegistration message_handler_frame {
 		Message::ID::TestAppPacket,
 		[this](Message* const p) {
 			const auto message = static_cast<const TestAppPacketMessage*>(p);
+			(void) message;
 			//this->on_frame(message);
 		}
 	};

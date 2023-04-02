@@ -65,6 +65,7 @@ SECTIONS
 
     .text : ALIGN(16) SUBALIGN(16)
     {
+        PROVIDE(stext = .);
         *(.text.startup.*)
         *(.text)
         *(.text.*)
@@ -73,6 +74,7 @@ SECTIONS
         *(.glue_7t)
         *(.glue_7)
         *(.gcc*)
+        PROVIDE(etext = .);
     } > flash
 
     .ARM.extab :

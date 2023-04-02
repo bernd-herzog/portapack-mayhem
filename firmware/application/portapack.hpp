@@ -58,7 +58,7 @@ void set_speaker_mode(const bool v);
 extern uint32_t bl_tick_counter;
 extern bool antenna_bias;
 
-extern LuaBinding *lua_binding;
+extern LuaBinding lua_binding;
 
 extern TemperatureLogger temperature_logger;
 
@@ -67,7 +67,6 @@ bool get_antenna_bias();
 
 bool init();
 void shutdown(const bool leave_screen_on = false);
-void do_lua();
 
 Backlight* backlight();
 

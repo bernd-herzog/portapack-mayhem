@@ -152,8 +152,6 @@ void EventDispatcher::dispatch(const eventmask_t events) {
 				*(uint32_t *)&shared_memory.bb_data.data[4]);
 	}
 
-	portapack::do_lua();
-
 	if( events & EVT_MASK_APPLICATION ) {
 		handle_application_queue();
 	}

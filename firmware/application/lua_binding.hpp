@@ -14,12 +14,10 @@ public:
 	void shutdown();
 	void get_str();
 	char * get_buf();
-	void enable();
 
 private:
 	lua_State *luaState = nullptr;
 	char buf[16];
-	int enabled;
 };
 
 

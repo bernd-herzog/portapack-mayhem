@@ -35,24 +35,20 @@ char s_str[16];
 
 
 LuaBinding::LuaBinding(){
-    this->enabled = 55;
 }
 
-LuaBinding::LuaBinding(const LuaBinding& other){
-    this->luaState = other.luaState;
-    this->enabled = other.enabled;
+LuaBinding::LuaBinding(const LuaBinding& other) :
+    luaState (other.luaState)
+{
 }
 
 LuaBinding& LuaBinding::operator=(const LuaBinding& other){
     this->luaState = other.luaState;
-    this->enabled = other.enabled;
     return *this;
 }
 
 LuaBinding::~LuaBinding(){
 }
-
-
 
 void LuaBinding::init() {
     lua_State *luaState = luaL_newstate();
@@ -63,23 +59,9 @@ void LuaBinding::init() {
 	lua_setglobal(luaState, "RegisterEvent");
 }
 
-void LuaBinding::enable() {
-    this->enabled = 1337;
-}
-
 void LuaBinding::get_str() {
 
-    //std::string s = std::to_string(this->enabled);
-
-
-	if (this->enabled == 1337) {
-        luaL_dostring(luaState, "RegisterEvent('Hello LUA');"); // bad
-        //std::string s = std::to_string(this->enabled);
-    }
-    else {
-    }
-
-    //strncpy(this->buf, "2", 16);
+    luaL_dostring(luaState, "RegisterEvent('Hello LUA');");
 }
 
 char * LuaBinding::get_buf() {

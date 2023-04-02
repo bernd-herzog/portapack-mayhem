@@ -88,7 +88,7 @@ TransmitterModel transmitter_model;
 
 TemperatureLogger temperature_logger;
 
-LuaBinding *lua_binding = nullptr;
+LuaBinding lua_binding;
 
 bool antenna_bias { false };
 uint32_t bl_tick_counter { 0 };
@@ -513,14 +513,9 @@ bool init() {
 	chThdSleepMilliseconds(10);
 
 	audio::init(portapack_audio_codec());
-	lua_binding = new LuaBinding();
-	lua_binding->init();
+	lua_binding.init();
 
 	return true;
-}
-
-void do_lua() {
-	lua_binding->get_str();
 }
 
 void shutdown(const bool leave_screen_on) {
@@ -533,7 +528,7 @@ void shutdown(const bool leave_screen_on) {
 	
 	radio::disable();
 	audio::shutdown();
-	//lua_binding->shutdown();
+	lua_binding.shutdown();
 
 	hackrf::cpld::init_from_eeprom();
 

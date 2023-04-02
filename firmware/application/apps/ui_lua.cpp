@@ -45,35 +45,30 @@ LuaView::~LuaView() {
 	//rtc_time::signal_tick_second -= signal_token_tick_second;
 	//receiver_model.disable();
 	//
-	baseband::shutdown();
+	//baseband::shutdown();
 }
 
 LuaView::LuaView(NavigationView& nav) {
-
-	//chDbgPanic("sadf");
-    // void (*bad_instruction)(void);
-    // bad_instruction = (void (*)())0xFFFFFFFF;
-    // bad_instruction(); // more bad
-
+	(void)nav;
 	
-
-	//size_t m0_fragmented_free_space = 0;
-	//chHeapStatus(NULL, &m0_fragmented_free_space);
-
-	baseband::run_image(portapack::spi_flash::image_tag_test);
+	//baseband::run_image(portapack::spi_flash::image_tag_test);
 
 	add_children({
 		&labels,
+		&button_run
 	});
 
+	portapack::lua_binding.get_str();
 	
-	portapack::lua_binding->enable();
-	//portapack::lua_binding->get_str();
-	char *s = portapack::lua_binding->get_buf();
+	char *s = portapack::lua_binding.get_buf();
 
 	labels.set_labels({{ { 0 * 8, 0 * 8 }, s, Color::light_grey() },});
 	
 
+}
+
+void LuaView::focus() {
+	button_run.focus();
 }
 
 } /* namespace ui */

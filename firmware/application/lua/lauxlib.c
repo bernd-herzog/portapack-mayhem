@@ -728,13 +728,37 @@ static int l_check_memlimit(lua_State *L, size_t needbytes) {
 }
 
 
+void chHeapFree(void *p);
+void *chHeapAlloc(void *heapp, size_t size);
+
+
+static void lua_ch_free(void *ptr){
+  if (ptr == 0)
+    return;
+
+  chHeapFree(ptr);
+}
+
+
+static void *lua_ch_realloc(void *ptr, size_t osize, size_t nsize){
+  if (ptr == 0)
+    return chHeapAlloc(0x0, nsize);
+  else {
+    void *new_memory = chHeapAlloc(0x0, nsize);
+    memcpy(new_memory, ptr, osize);
+    chHeapFree(ptr);
+    return new_memory;
+  }
+}
+
+
 static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
   lua_State *L = (lua_State *)ud;
   int mode = L == NULL ? 0 : G(L)->egcmode;
   void *nptr;
 
   if (nsize == 0) {
-    free(ptr);
+    lua_ch_free(ptr);
     return NULL;
   }
   if (L != NULL && (mode & EGC_ALWAYS)) /* always collect memory if requested */
@@ -746,10 +770,10 @@ static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
     if(G(L)->memlimit > 0 && (mode & EGC_ON_MEM_LIMIT) && l_check_memlimit(L, nsize - osize))
       return NULL;
   }
-  nptr = realloc(ptr, nsize);
+  nptr = lua_ch_realloc(ptr, osize, nsize);
   if (nptr == NULL && L != NULL && (mode & EGC_ON_ALLOC_FAILURE)) {
     luaC_fullgc(L); /* emergency full collection. */
-    nptr = realloc(ptr, nsize); /* try allocation again */
+    nptr = lua_ch_realloc(ptr, osize, nsize); /* try allocation again */
   }
   return nptr;
 }

@@ -542,6 +542,7 @@ ReceiversMenuView::ReceiversMenuView(NavigationView& nav) {
 		add_items( { { "..", ui::Color::light_grey(),&bitmap_icon_previous , [&nav](){ nav.pop(); } } } );
 	}
 	add_items( {
+		{ "LUA",		ui::Color::green(),		&bitmap_icon_adsb,			[&nav](){ nav.push<LuaView>(); }, },
 		{ "ADS-B",		ui::Color::green(),		&bitmap_icon_adsb,			[&nav](){ nav.push<ADSBRxView>(); }, },
 		//{ "ACARS",	ui::Color::yellow(),	&bitmap_icon_adsb,			[&nav](){ nav.push<ACARSAppView>(); }, },
 		{ "AIS Boats",	ui::Color::green(),		&bitmap_icon_ais,			[&nav](){ nav.push<AISAppView>(); } },
