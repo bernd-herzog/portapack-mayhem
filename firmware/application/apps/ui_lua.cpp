@@ -37,14 +37,6 @@ using namespace portapack;
 namespace ui {
 
 LuaView::~LuaView() {
-
-	// save app settings
-
-	//TODO: once all apps keep there own settin previous frequency logic can be removed
-	//receiver_model.set_tuning_frequency(prevFreq);
-	//rtc_time::signal_tick_second -= signal_token_tick_second;
-	//receiver_model.disable();
-	//
 	//baseband::shutdown();
 }
 
@@ -63,8 +55,6 @@ LuaView::LuaView(NavigationView& nav) {
 	char *s = portapack::lua_binding.get_buf();
 
 	labels.set_labels({{ { 0 * 8, 0 * 8 }, s, Color::light_grey() },});
-	
-
 }
 
 void LuaView::focus() {

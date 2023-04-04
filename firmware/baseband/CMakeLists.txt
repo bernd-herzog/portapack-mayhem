@@ -562,6 +562,13 @@ set(MODE_CPPSRC
 )
 DeclareTargets(PUSB sd_over_usb)
 
+### Lua general purpose rx
+
+set(MODE_CPPSRC
+	proc_lua_rx.cpp
+)
+DeclareTargets(PLUR lua_rx)
+
 ### HackRF "factory" firmware
 
 add_custom_command(

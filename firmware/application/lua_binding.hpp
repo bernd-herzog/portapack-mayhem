@@ -15,5 +15,3 @@ private:
 	lua_State *luaState = nullptr;
 	char buf[16];
 };
-
-

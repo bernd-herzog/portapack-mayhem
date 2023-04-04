@@ -19,7 +19,7 @@ int l_sin (lua_State *L) {
     return 0;
 }
 
-LuaBinding::LuaBinding(){
+LuaBinding::LuaBinding() {
 }
 
 void LuaBinding::init() {

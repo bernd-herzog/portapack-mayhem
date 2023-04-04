@@ -20,7 +20,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-//#pragma once
+#pragma once
 
 #include "ui.hpp"
 #include "portapack.hpp"
@@ -28,18 +28,6 @@
 #include "ui_navigation.hpp"
 #include "event_m0.hpp"
 #include "lua_binding.hpp"
-
-//#include "ui_geomap.hpp"
-//#include "ui_font_fixed_8x16.hpp"
-
-//#include "file.hpp"
-//#include "database.hpp"
-//#include "recent_entries.hpp"
-//#include "log_file.hpp"
-//#include "adsb.hpp"
-//#include "message.hpp"
-//#include "app_settings.hpp"
-//#include "crc.hpp"
 
 namespace ui {
 	
