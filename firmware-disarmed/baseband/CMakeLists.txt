@@ -27,7 +27,7 @@
 
 enable_language(C CXX ASM)
 
-project(baseband_shared)
+project(baseband_shared-disarmed)
 
 # Compiler options here.
 set(USE_OPT "-O3 -g -falign-functions=16 -fno-math-errno --specs=nano.specs")
@@ -93,53 +93,55 @@ set(CSRC
 	${BOARDSRC}
 )
 
+set(FIRMWARE_BASEBAND ${FIRMWARE_SOURCE_DIR}/baseband)
+
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 set(CPPSRC
-	baseband.cpp
+	${FIRMWARE_BASEBAND}/baseband.cpp
 	${COMMON}/message_queue.cpp
 	${COMMON}/event.cpp
-	event_m4.cpp
+	${FIRMWARE_BASEBAND}/event_m4.cpp
 	${COMMON}/thread_wait.cpp
 	${COMMON}/gpdma.cpp
-	baseband_dma.cpp
+	${FIRMWARE_BASEBAND}/baseband_dma.cpp
 	${COMMON}/baseband_sgpio.cpp
 	${COMMON}/portapack_shared_memory.cpp
 	${COMMON}/buffer.cpp
-	baseband_thread.cpp
-	baseband_processor.cpp
-	baseband_stats_collector.cpp
-	dsp_decimate.cpp
-	dsp_demodulate.cpp
-	dsp_hilbert.cpp
-	dsp_modulate.cpp
-	dsp_goertzel.cpp
-	matched_filter.cpp
-	spectrum_collector.cpp
-	tv_collector.cpp
-	stream_input.cpp
-	stream_output.cpp
-	dsp_squelch.cpp
-	clock_recovery.cpp
-	packet_builder.cpp
+	${FIRMWARE_BASEBAND}/baseband_thread.cpp
+	${FIRMWARE_BASEBAND}/baseband_processor.cpp
+	${FIRMWARE_BASEBAND}/baseband_stats_collector.cpp
+	${FIRMWARE_BASEBAND}/dsp_decimate.cpp
+	${FIRMWARE_BASEBAND}/dsp_demodulate.cpp
+	${FIRMWARE_BASEBAND}/dsp_hilbert.cpp
+	${FIRMWARE_BASEBAND}/dsp_modulate.cpp
+	${FIRMWARE_BASEBAND}/dsp_goertzel.cpp
+	${FIRMWARE_BASEBAND}/matched_filter.cpp
+	${FIRMWARE_BASEBAND}/spectrum_collector.cpp
+	${FIRMWARE_BASEBAND}/tv_collector.cpp
+	${FIRMWARE_BASEBAND}/stream_input.cpp
+	${FIRMWARE_BASEBAND}/stream_output.cpp
+	${FIRMWARE_BASEBAND}/dsp_squelch.cpp
+	${FIRMWARE_BASEBAND}/clock_recovery.cpp
+	${FIRMWARE_BASEBAND}/packet_builder.cpp
 	${COMMON}/dsp_fft.cpp
 	${COMMON}/dsp_fir_taps.cpp
 	${COMMON}/dsp_iir.cpp
 	${COMMON}/dsp_sos.cpp
-	fxpt_atan2.cpp
-	rssi.cpp
-	rssi_dma.cpp
-	rssi_thread.cpp
-	audio_compressor.cpp
-	audio_output.cpp
-	audio_input.cpp
-	audio_dma.cpp
-	audio_stats_collector.cpp
+	${FIRMWARE_BASEBAND}/fxpt_atan2.cpp
+	${FIRMWARE_BASEBAND}/rssi.cpp
+	${FIRMWARE_BASEBAND}/rssi_dma.cpp
+	${FIRMWARE_BASEBAND}/rssi_thread.cpp
+	${FIRMWARE_BASEBAND}/audio_compressor.cpp
+	${FIRMWARE_BASEBAND}/audio_output.cpp
+	${FIRMWARE_BASEBAND}/audio_input.cpp
+	${FIRMWARE_BASEBAND}/audio_dma.cpp
+	${FIRMWARE_BASEBAND}/audio_stats_collector.cpp
 	${COMMON}/utility.cpp
 	${COMMON}/chibios_cpp.cpp
-	debug.cpp
+	${FIRMWARE_BASEBAND}/debug.cpp
 	${COMMON}/gcc.cpp
-	tone_gen.cpp
+	${FIRMWARE_BASEBAND}/tone_gen.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.
@@ -257,7 +259,7 @@ include_directories(. ${INCDIR})
 set(BASEBAND_IMAGES)
 
 macro(DeclareTargets chunk_tag name)
-	project("baseband_${name}")
+	project("baseband_disarm_${name}")
 
 	include(${RULESPATH}/rules.cmake)
 	add_executable(${PROJECT_NAME}.elf $<TARGET_OBJECTS:baseband_shared> ${MODE_CPPSRC} ${HALSRC} ${PLATFORMSRC})
@@ -281,236 +283,13 @@ macro(DeclareTargets chunk_tag name)
 	set(BASEBAND_IMAGES ${BASEBAND_IMAGES} ${PROJECT_NAME}.img)
 endmacro()
 
-### ACARS RX
-
-set(MODE_CPPSRC
-	proc_acars.cpp
-)
-DeclareTargets(PACA acars)
-
-### ADS-B RX
-
-set(MODE_CPPSRC
-	proc_adsbrx.cpp
-)
-DeclareTargets(PADR adsbrx)
-
-### ADS-B TX
-
-set(MODE_CPPSRC
-	proc_adsbtx.cpp
-)
-DeclareTargets(PADT adsbtx)
-
-### AFSK
-
-set(MODE_CPPSRC
-	proc_afsk.cpp
-)
-DeclareTargets(PAFT afsktx)
-
-### AFSK RX
-
-set(MODE_CPPSRC
-	proc_afskrx.cpp
-)
-DeclareTargets(PAFR afskrx)
-
-### APRS RX
-
-set(MODE_CPPSRC
-	proc_aprsrx.cpp
-)
-DeclareTargets(PAPR aprsrx)
-
-### NRF RX
-
-set(MODE_CPPSRC
-	proc_nrfrx.cpp
-)
-DeclareTargets(PNRR nrfrx)
-
-### BTLE RX
-
-set(MODE_CPPSRC
-	proc_btlerx.cpp
-)
-DeclareTargets(PBTR btlerx)
-### AIS
-
-set(MODE_CPPSRC
-	proc_ais.cpp
-)
-DeclareTargets(PAIS ais)
-
-### AM Audio
-
-set(MODE_CPPSRC
-	proc_am_audio.cpp
-)
-DeclareTargets(PAMA am_audio)
-
-### AM TV
-
-set(MODE_CPPSRC
-	proc_am_tv.cpp
-)
-DeclareTargets(PAMT am_tv)
-
-### Audio transmit
-
-set(MODE_CPPSRC
-	proc_audiotx.cpp
-)
-DeclareTargets(PATX audio_tx)
-
-### Capture
-
-set(MODE_CPPSRC
-	proc_capture.cpp
-)
-DeclareTargets(PCAP capture)
-
-### ERT
-
-set(MODE_CPPSRC
-	proc_ert.cpp
-)
-DeclareTargets(PERT ert)
-
-### Radiosonde
-
-set(MODE_CPPSRC
-	proc_sonde.cpp
-)
-DeclareTargets(PSON sonde)
-
-### FSK TX
-
-set(MODE_CPPSRC
-	proc_fsk.cpp
-)
-DeclareTargets(PFSK fsktx)
-
-### Jammer
-
-set(MODE_CPPSRC
-	proc_jammer.cpp
-)
-DeclareTargets(PJAM jammer)
-
-### Microphone transmit
-
-set(MODE_CPPSRC
-	proc_mictx.cpp
-)
-DeclareTargets(PMTX mic_tx)
-
-### NFM Audio
-
-set(MODE_CPPSRC
-	proc_nfm_audio.cpp
-)
-DeclareTargets(PNFM nfm_audio)
-
-### No op
-
-set(MODE_CPPSRC
-	proc_noop.cpp
-)
-DeclareTargets(PNOP no_operation)
-
-### OOK
-
-set(MODE_CPPSRC
-	proc_ook.cpp
-)
-DeclareTargets(POOK ook)
-
-### POCSAG RX
-
-set(MODE_CPPSRC
-	proc_pocsag.cpp
-)
-DeclareTargets(PPOC pocsag)
-
-### RDS
-
-set(MODE_CPPSRC
-	proc_rds.cpp
-)
-DeclareTargets(PRDS rds)
-
-### Replay
-
-set(MODE_CPPSRC
-	proc_replay.cpp
-)
-DeclareTargets(PREP replay)
-
-### GPS Simulator
-
-set(MODE_CPPSRC
-	proc_gps_sim.cpp
-)
-DeclareTargets(PGPS gps_sim)
-
-### Signal generator
-
-set(MODE_CPPSRC
-	proc_siggen.cpp
-)
-DeclareTargets(PSIG siggen)
-
-### SSTV TX
-
-set(MODE_CPPSRC
-	proc_sstvtx.cpp
-)
-DeclareTargets(PSTX sstvtx)
-
-### Test
-
-set(MODE_CPPSRC
-	proc_test.cpp
-)
-DeclareTargets(PTST test)
-
-### Tones
-
-set(MODE_CPPSRC
-	proc_tones.cpp
-)
-DeclareTargets(PTON tones)
-
-### TPMS
-
-set(MODE_CPPSRC
-	proc_tpms.cpp
-)
-DeclareTargets(PTPM tpms)
-
-### Wideband Spectrum
-
-set(MODE_CPPSRC
-	proc_wideband_spectrum.cpp
-)
-DeclareTargets(PSPE wideband_spectrum)
-
-### WFM Audio
-
-set(MODE_CPPSRC
-	proc_wfm_audio.cpp
-)
-DeclareTargets(PWFM wfm_audio)
-
 ### Flash Utility
 
 include(${CHIBIOS_PORTAPACK}/os/various/fatfs_bindings/fatfs.cmake)
 set(MODE_INCDIR ${FATFSINC})
 set(MODE_CPPSRC
-	proc_flash_utility.cpp
-	w25q80bv.cpp
+	${FIRMWARE_BASEBAND}/proc_flash_utility.cpp
+	${FIRMWARE_BASEBAND}/w25q80bv.cpp
 	${FATFSSRC}
 )
 DeclareTargets(PFUT flash_utility)
@@ -523,13 +302,13 @@ set(MODE_INCDIR
 	${HACKRF_PATH}/firmware/libopencm3/include
 )
 set(MODE_CPPSRC
-	sd_over_usb/proc_sd_over_usb.cpp
+	${FIRMWARE_BASEBAND}/sd_over_usb/proc_sd_over_usb.cpp
 	
-	sd_over_usb/scsi.c
-	sd_over_usb/diskio.c
-	sd_over_usb/sd_over_usb.c
-	sd_over_usb/usb_descriptor.c
-	sd_over_usb/hackrf_core.c
+	${FIRMWARE_BASEBAND}/sd_over_usb/scsi.c
+	${FIRMWARE_BASEBAND}/sd_over_usb/diskio.c
+	${FIRMWARE_BASEBAND}/sd_over_usb/sd_over_usb.c
+	${FIRMWARE_BASEBAND}/sd_over_usb/usb_descriptor.c
+	${FIRMWARE_BASEBAND}/sd_over_usb/hackrf_core.c
 
 	${HACKRF_PATH}/firmware/common/usb.c
 	${HACKRF_PATH}/firmware/common/usb_queue.c
@@ -562,6 +341,13 @@ set(MODE_CPPSRC
 )
 DeclareTargets(PUSB sd_over_usb)
 
+### Lua general purpose rx
+
+set(MODE_CPPSRC
+	proc_lua_rx.cpp
+)
+DeclareTargets(PLUR lua_rx)
+
 ### HackRF "factory" firmware
 
 add_custom_command(
@@ -587,7 +373,7 @@ set(BASEBAND_IMAGES ${BASEBAND_IMAGES} terminator.img)
 
 #######################################################################
 
-project(baseband)
+project(baseband-disarmed)
 	
 add_custom_command(
 	OUTPUT ${PROJECT_NAME}.img

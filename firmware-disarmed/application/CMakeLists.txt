@@ -27,7 +27,7 @@
 
 enable_language(C CXX ASM)
 
-project(application)
+project(application-disarmed)
 
 # Compiler options here.
 set(USE_OPT "-Os -g --specs=nano.specs --specs=nosys.specs")
@@ -93,6 +93,8 @@ include(${CHIBIOS}/test/test.cmake)
 # Define linker script file here
 set(LDSCRIPT ${PORTLD}/LPC43xx_M0.ld)
 
+set(FIRMWARE_APPLICATION ${FIRMWARE_SOURCE_DIR}/application)
+
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 set(CSRC
@@ -103,7 +105,41 @@ set(CSRC
 	${PLATFORMSRC}
 	${BOARDSRC}
 	${FATFSSRC}
-	firmware_info.c
+	${FIRMWARE_APPLICATION}/firmware_info.c
+	tiny_memory_elua/lapi.c
+	tiny_memory_elua/lcode.c
+	#tiny_memory_elua/lctype.c
+	tiny_memory_elua/ldebug.c
+	tiny_memory_elua/ldo.c
+	tiny_memory_elua/ldump.c
+	tiny_memory_elua/lfunc.c
+	tiny_memory_elua/lgc.c
+	tiny_memory_elua/llex.c
+	tiny_memory_elua/lmem.c
+	tiny_memory_elua/lobject.c
+	tiny_memory_elua/lopcodes.c
+	tiny_memory_elua/lparser.c
+	tiny_memory_elua/lstate.c
+	tiny_memory_elua/lstring.c
+	tiny_memory_elua/ltable.c
+	tiny_memory_elua/ltm.c
+	tiny_memory_elua/lundump.c
+	tiny_memory_elua/lvm.c
+	tiny_memory_elua/lzio.c
+	tiny_memory_elua/lauxlib.c
+	tiny_memory_elua/lbaselib.c
+	#tiny_memory_elua/lcorolib.c
+	tiny_memory_elua/legc.c
+	tiny_memory_elua/lrotable.c
+	tiny_memory_elua/ldblib.c
+	tiny_memory_elua/liolib.c
+	tiny_memory_elua/lmathlib.c
+	tiny_memory_elua/loadlib.c
+	tiny_memory_elua/loslib.c
+	tiny_memory_elua/lstrlib.c
+	tiny_memory_elua/ltablib.c
+	#tiny_memory_elua/lutf8lib.c
+	tiny_memory_elua/linit.c
 )
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -125,7 +161,7 @@ set(CPPSRC
 	${COMMON}/cpld_max5.cpp
 	${COMMON}/cpld_update.cpp
 	${COMMON}/cpld_xilinx.cpp
-	debug.cpp
+	${FIRMWARE_APPLICATION}/debug.cpp
 	${COMMON}/ert_packet.cpp
 	${COMMON}/event.cpp
 	${COMMON}/gcc.cpp
@@ -155,147 +191,148 @@ set(CPPSRC
 	${COMMON}/ui_widget.cpp
 	${COMMON}/utility.cpp
 	${COMMON}/wm8731.cpp
-	app_settings.cpp
-	audio.cpp
-	baseband_api.cpp
-	capture_thread.cpp
-	clock_manager.cpp
-	core_control.cpp
-	database.cpp
-	de_bruijn.cpp
-	#emu_cc1101.cpp
-	rfm69.cpp
-	event_m0.cpp
-	file.cpp
-	freqman.cpp
-	io_file.cpp
-	io_wave.cpp
-	irq_controls.cpp
-	irq_lcd_frame.cpp
-	irq_rtc.cpp
-	log_file.cpp
-	portapack.cpp
-	qrcodegen.cpp
-	radio.cpp
-	receiver_model.cpp
-	recent_entries.cpp
-	replay_thread.cpp
-	rf_path.cpp
-	rtc_time.cpp
-	sd_card.cpp
-	serializer.cpp
-	spectrum_color_lut.cpp
-	string_format.cpp
-	temperature_logger.cpp
-	touch.cpp
-	tone_key.cpp
-	transmitter_model.cpp
-	tuning.cpp
-	hw/debounce.cpp
-	hw/encoder.cpp
-	hw/max2837.cpp
-	hw/max2839.cpp
-	hw/max5864.cpp
-	hw/rffc507x.cpp
-	hw/rffc507x_spi.cpp
-	hw/si5351.cpp
-	hw/spi_pp.cpp
-	hw/touch_adc.cpp
-	ui_baseband_stats_view.cpp
-	ui_navigation.cpp
-	ui_playdead.cpp
-	ui_record_view.cpp
-	ui_sd_card_status_view.cpp
-	ui/ui_alphanum.cpp
-	ui/ui_audio.cpp
-	ui/ui_channel.cpp
-	ui/ui_font_fixed_8x16.cpp
-	ui/ui_geomap.cpp
-        ui/ui_qrcode.cpp
-	ui/ui_menu.cpp
-	ui/ui_btngrid.cpp
-	ui/ui_receiver.cpp
-	ui/ui_rssi.cpp
-	ui/ui_tv.cpp
-	ui/ui_spectrum.cpp
-	ui/ui_tabview.cpp
-	ui/ui_textentry.cpp
-	ui/ui_transmitter.cpp
-	apps/ui_about_simple.cpp
-	apps/ui_adsb_rx.cpp
-	apps/ui_adsb_tx.cpp
-	apps/ui_afsk_rx.cpp
-	apps/ui_aprs_rx.cpp
-	apps/ui_btle_rx.cpp
-	apps/ui_nrf_rx.cpp
-	apps/ui_aprs_tx.cpp
-	apps/ui_bht_tx.cpp
-	apps/ui_coasterp.cpp
-	apps/ui_debug.cpp
-	apps/ui_encoders.cpp
-	apps/ui_fileman.cpp
-	apps/ui_flash_utility.cpp
-	apps/ui_sd_over_usb.cpp
-	apps/ui_freqman.cpp
-	apps/ui_jammer.cpp
-	apps/ui_keyfob.cpp
-	apps/ui_lcr.cpp
-	apps/lge_app.cpp
-	apps/ui_looking_glass_app.cpp
-	apps/ui_mictx.cpp
-	apps/ui_modemsetup.cpp
-	apps/ui_morse.cpp
-	# apps/ui_nuoptix.cpp
-	apps/ui_pocsag_tx.cpp
-	apps/ui_rds.cpp
-	apps/ui_remote.cpp
-	apps/ui_scanner.cpp
-	apps/ui_search.cpp
-	apps/ui_sd_wipe.cpp
-	apps/ui_settings.cpp
-	apps/ui_siggen.cpp
-	apps/ui_sonde.cpp
-	apps/ui_sstvtx.cpp
-	# apps/ui_test.cpp
-	apps/ui_tone_search.cpp
-	apps/ui_touch_calibration.cpp
-	apps/ui_touchtunes.cpp
-	apps/ui_view_wav.cpp
-	apps/ui_whipcalc.cpp
-	apps/acars_app.cpp
-	apps/ais_app.cpp
-	apps/analog_audio_app.cpp
-	apps/analog_tv_app.cpp
-	apps/capture_app.cpp
-	apps/ert_app.cpp
-	apps/lge_app.cpp
-	apps/pocsag_app.cpp
-	apps/replay_app.cpp
-	apps/ui_playlist.cpp
-	apps/gps_sim_app.cpp
-	apps/soundboard_app.cpp
-	apps/ui_recon.cpp  
-	apps/ui_recon_settings.cpp
-	apps/ui_level.cpp  
-	apps/tpms_app.cpp
-	apps/tpms_app.cpp
-	protocols/aprs.cpp
-	protocols/ax25.cpp
-	protocols/bht.cpp
-	protocols/dcs.cpp
-	protocols/encoders.cpp
-	protocols/lcr.cpp
-	protocols/modems.cpp
-	protocols/rds.cpp
-	# ui_handwrite.cpp
-	# ui_loadmodule.cpp
-	# ui_numbers.cpp
-	# ui_replay_view.cpp
-	# ui_script.cpp
-	ui_sd_card_debug.cpp
+	${FIRMWARE_APPLICATION}/app_settings.cpp
+	${FIRMWARE_APPLICATION}/audio.cpp
+	${FIRMWARE_APPLICATION}/baseband_api.cpp
+	${FIRMWARE_APPLICATION}/capture_thread.cpp
+	${FIRMWARE_APPLICATION}/clock_manager.cpp
+	${FIRMWARE_APPLICATION}/core_control.cpp
+	${FIRMWARE_APPLICATION}/database.cpp
+	${FIRMWARE_APPLICATION}/de_bruijn.cpp
+	#${FIRMWARE_APPLICATION}/emu_cc1101.cpp
+	${FIRMWARE_APPLICATION}/rfm69.cpp
+	${FIRMWARE_APPLICATION}/event_m0.cpp
+	${FIRMWARE_APPLICATION}/file.cpp
+	${FIRMWARE_APPLICATION}/freqman.cpp
+	${FIRMWARE_APPLICATION}/io_file.cpp
+	${FIRMWARE_APPLICATION}/io_wave.cpp
+	${FIRMWARE_APPLICATION}/irq_controls.cpp
+	${FIRMWARE_APPLICATION}/irq_lcd_frame.cpp
+	${FIRMWARE_APPLICATION}/irq_rtc.cpp
+	${FIRMWARE_APPLICATION}/log_file.cpp
+	${FIRMWARE_APPLICATION}/portapack.cpp
+	${FIRMWARE_APPLICATION}/qrcodegen.cpp
+	${FIRMWARE_APPLICATION}/radio.cpp
+	${FIRMWARE_APPLICATION}/receiver_model.cpp
+	${FIRMWARE_APPLICATION}/recent_entries.cpp
+	${FIRMWARE_APPLICATION}/replay_thread.cpp
+	${FIRMWARE_APPLICATION}/rf_path.cpp
+	${FIRMWARE_APPLICATION}/rtc_time.cpp
+	${FIRMWARE_APPLICATION}/sd_card.cpp
+	${FIRMWARE_APPLICATION}/serializer.cpp
+	${FIRMWARE_APPLICATION}/spectrum_color_lut.cpp
+	${FIRMWARE_APPLICATION}/string_format.cpp
+	${FIRMWARE_APPLICATION}/temperature_logger.cpp
+	${FIRMWARE_APPLICATION}/touch.cpp
+	${FIRMWARE_APPLICATION}/tone_key.cpp
+	${FIRMWARE_APPLICATION}/transmitter_model.cpp
+	${FIRMWARE_APPLICATION}/tuning.cpp
+	${FIRMWARE_APPLICATION}/hw/debounce.cpp
+	${FIRMWARE_APPLICATION}/hw/encoder.cpp
+	${FIRMWARE_APPLICATION}/hw/max2837.cpp
+	${FIRMWARE_APPLICATION}/hw/max2839.cpp
+	${FIRMWARE_APPLICATION}/hw/max5864.cpp
+	${FIRMWARE_APPLICATION}/hw/rffc507x.cpp
+	${FIRMWARE_APPLICATION}/hw/rffc507x_spi.cpp
+	${FIRMWARE_APPLICATION}/hw/si5351.cpp
+	${FIRMWARE_APPLICATION}/hw/spi_pp.cpp
+	${FIRMWARE_APPLICATION}/hw/touch_adc.cpp
+	${FIRMWARE_APPLICATION}/ui_baseband_stats_view.cpp
+	${FIRMWARE_APPLICATION}/ui_navigation.cpp
+	${FIRMWARE_APPLICATION}/ui_playdead.cpp
+	${FIRMWARE_APPLICATION}/ui_record_view.cpp
+	${FIRMWARE_APPLICATION}/ui_sd_card_status_view.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_alphanum.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_audio.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_channel.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_font_fixed_8x16.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_geomap.cpp
+    ${FIRMWARE_APPLICATION}/ui/ui_qrcode.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_menu.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_btngrid.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_receiver.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_rssi.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_tv.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_spectrum.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_tabview.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_textentry.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_transmitter.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_about_simple.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_adsb_rx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_adsb_tx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_afsk_rx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_aprs_rx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_btle_rx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_nrf_rx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_aprs_tx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_bht_tx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_coasterp.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_debug.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_encoders.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_fileman.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_flash_utility.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_sd_over_usb.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_freqman.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_jammer.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_keyfob.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_lcr.cpp
+	# ${FIRMWARE_APPLICATION}/apps/lge_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_looking_glass_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_mictx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_modemsetup.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_morse.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_nuoptix.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_pocsag_tx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_rds.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_remote.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_scanner.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_search.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_sd_wipe.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_settings.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_siggen.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_sonde.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_sstvtx.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_test.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_tone_search.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_touch_calibration.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_touchtunes.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_view_wav.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_whipcalc.cpp
+	# ${FIRMWARE_APPLICATION}/apps/acars_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ais_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/analog_audio_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/analog_tv_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/capture_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ert_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/lge_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/pocsag_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/replay_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_playlist.cpp
+	# ${FIRMWARE_APPLICATION}/apps/gps_sim_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/soundboard_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_recon.cpp  
+	# ${FIRMWARE_APPLICATION}/apps/ui_recon_settings.cpp
+	# ${FIRMWARE_APPLICATION}/apps/ui_level.cpp  
+	# ${FIRMWARE_APPLICATION}/apps/tpms_app.cpp
+	# ${FIRMWARE_APPLICATION}/apps/tpms_app.cpp
+	${FIRMWARE_APPLICATION}/protocols/aprs.cpp
+	${FIRMWARE_APPLICATION}/protocols/ax25.cpp
+	${FIRMWARE_APPLICATION}/protocols/bht.cpp
+	${FIRMWARE_APPLICATION}/protocols/dcs.cpp
+	${FIRMWARE_APPLICATION}/protocols/encoders.cpp
+	${FIRMWARE_APPLICATION}/protocols/lcr.cpp
+	${FIRMWARE_APPLICATION}/protocols/modems.cpp
+	${FIRMWARE_APPLICATION}/protocols/rds.cpp
+	# ${FIRMWARE_APPLICATION}/ui_handwrite.cpp
+	# ${FIRMWARE_APPLICATION}/ui_loadmodule.cpp
+	# ${FIRMWARE_APPLICATION}/ui_numbers.cpp
+	# ${FIRMWARE_APPLICATION}/ui_replay_view.cpp
+	# ${FIRMWARE_APPLICATION}/ui_script.cpp
+	${FIRMWARE_APPLICATION}/ui_sd_card_debug.cpp
 	${CPLD_20150901_DATA_CPP}
 	${CPLD_20170522_DATA_CPP}
 	${HACKRF_CPLD_DATA_CPP}
+	lua_binding/state.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.
@@ -321,7 +358,7 @@ set(TCPPSRC)
 # List ASM source files here
 set(ASMSRC
 	${PORTASM}
-	lz4.S
+	${FIRMWARE_APPLICATION}/lz4.S
 )
 
 set(INCDIR ${CMAKE_CURRENT_BINARY_DIR} ${COMMON} ${PORTINC} ${KERNINC} ${TESTINC}
@@ -371,7 +408,7 @@ set(CPPWARN "-Wall -Wextra -Wno-psabi")
 # List all default C defines here, like -D_DEBUG=1
 # TODO: Switch -DCRT0_INIT_DATA depending on load from RAM or SPIFI?
 # NOTE: _RANDOM_TCC to kill a GCC 4.9.3 error with std::max argument types
-set(DDEFS "-DLPC43XX -DLPC43XX_M0 -D__NEWLIB__ -DHACKRF_ONE -DTOOLCHAIN_GCC -DTOOLCHAIN_GCC_ARM -D_RANDOM_TCC=0 -D'VERSION_STRING=\"${VERSION}\"'")
+set(DDEFS "-DLPC43XX -DLPC43XX_M0 -D__NEWLIB__ -DHACKRF_ONE -DLUA_OPTIMIZE_MEMORY=2 -DTOOLCHAIN_GCC -DTOOLCHAIN_GCC_ARM -D_RANDOM_TCC=0 -D'VERSION_STRING=\"${VERSION}\"'")
 
 # List all default ASM defines here, like -D_DEBUG=1
 set(DADEFS)

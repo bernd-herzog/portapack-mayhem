@@ -35,7 +35,6 @@
 #include "radio.hpp"
 #include "clock_manager.hpp"
 #include "temperature_logger.hpp"
-#include "lua_binding.hpp"
 
 namespace portapack {
 
@@ -57,8 +56,6 @@ void set_speaker_mode(const bool v);
 
 extern uint32_t bl_tick_counter;
 extern bool antenna_bias;
-
-extern LuaBinding lua_binding;
 
 extern TemperatureLogger temperature_logger;
 
