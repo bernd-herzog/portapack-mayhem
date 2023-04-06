@@ -38,12 +38,16 @@ set(FIRMWARE_FILENAME ${FIRMWARE_NAME}.bin)
 add_subdirectory(application)
 add_subdirectory(baseband)
 
+set(application_disarmed_BINARY_DIR ${PROJECT_SOURCE_DIR}/../build/firmware-disarmed/application)
+set(baseband_disarmed_BINARY_DIR ${PROJECT_SOURCE_DIR}/../build/firmware-disarmed/baseband)
+
+
 # NOTE: Dependencies break if the .bin files aren't included in DEPENDS. WTF, CMake?
 add_custom_command(
 	OUTPUT ${FIRMWARE_FILENAME}
-	COMMAND ${MAKE_SPI_IMAGE} ${application_BINARY_DIR}/application.bin ${baseband_BINARY_DIR}/baseband.img ${FIRMWARE_FILENAME}
-	DEPENDS baseband application ${MAKE_SPI_IMAGE}
-		 ${baseband_BINARY_DIR}/baseband.img ${application_BINARY_DIR}/application.bin
+	COMMAND ${MAKE_SPI_IMAGE} ${application_disarmed_BINARY_DIR}/application-disarmed.bin ${baseband_disarmed_BINARY_DIR}/baseband-disarmed.img ${FIRMWARE_FILENAME}
+	DEPENDS baseband-disarmed application-disarmed ${MAKE_SPI_IMAGE}
+		 ${baseband_disarmed_BINARY_DIR}/baseband-disarmed.img ${application_disarmed_BINARY_DIR}/application-disarmed.bin
 	VERBATIM
 )
 

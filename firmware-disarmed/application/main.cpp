@@ -121,7 +121,6 @@ Continuous (Fox-oring)
 #include "ui.hpp"
 #include "ui_widget.hpp"
 #include "ui_painter.hpp"
-#include "ui_navigation.hpp"
 
 #include "irq_lcd_frame.hpp"
 #include "irq_controls.hpp"
@@ -144,6 +143,8 @@ Continuous (Fox-oring)
 #include <string.h>
 
 #include "rffc507x.hpp"      /* c/m, avoiding initial short ON Ant_DC_Bias pulse, from cold reset  */
+#include "ui_lua_view.hpp"
+#include "lua_binding/state.hpp"
 
 rffc507x::RFFC507x first_if;
 
@@ -173,8 +174,8 @@ int main(void) {
 
 		lcd_frame_sync_configure();
 		rtc_interrupt_enable();
+		lua::lua_binding.init();
 
-		initialize_lua();
 		event_loop();
 
 		sdcDisconnect(&SDCD1);

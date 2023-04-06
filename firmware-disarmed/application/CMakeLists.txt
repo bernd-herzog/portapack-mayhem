@@ -237,26 +237,26 @@ set(CPPSRC
 	${FIRMWARE_APPLICATION}/hw/si5351.cpp
 	${FIRMWARE_APPLICATION}/hw/spi_pp.cpp
 	${FIRMWARE_APPLICATION}/hw/touch_adc.cpp
-	${FIRMWARE_APPLICATION}/ui_baseband_stats_view.cpp
-	${FIRMWARE_APPLICATION}/ui_navigation.cpp
-	${FIRMWARE_APPLICATION}/ui_playdead.cpp
-	${FIRMWARE_APPLICATION}/ui_record_view.cpp
-	${FIRMWARE_APPLICATION}/ui_sd_card_status_view.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_alphanum.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_audio.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_channel.cpp
+	#${FIRMWARE_APPLICATION}/ui_baseband_stats_view.cpp
+	#${FIRMWARE_APPLICATION}/ui_navigation.cpp
+	#${FIRMWARE_APPLICATION}/ui_playdead.cpp
+	#${FIRMWARE_APPLICATION}/ui_record_view.cpp
+	#${FIRMWARE_APPLICATION}/ui_sd_card_status_view.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_alphanum.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_audio.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_channel.cpp
 	${FIRMWARE_APPLICATION}/ui/ui_font_fixed_8x16.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_geomap.cpp
-    ${FIRMWARE_APPLICATION}/ui/ui_qrcode.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_menu.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_btngrid.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_receiver.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_rssi.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_tv.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_spectrum.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_tabview.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_textentry.cpp
-	${FIRMWARE_APPLICATION}/ui/ui_transmitter.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_geomap.cpp
+    #${FIRMWARE_APPLICATION}/ui/ui_qrcode.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_menu.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_btngrid.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_receiver.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_rssi.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_tv.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_spectrum.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_tabview.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_textentry.cpp
+	#${FIRMWARE_APPLICATION}/ui/ui_transmitter.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_about_simple.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_adsb_rx.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_adsb_tx.cpp
@@ -333,6 +333,7 @@ set(CPPSRC
 	${CPLD_20170522_DATA_CPP}
 	${HACKRF_CPLD_DATA_CPP}
 	lua_binding/state.cpp
+	ui_lua_view.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.
@@ -365,11 +366,12 @@ set(INCDIR ${CMAKE_CURRENT_BINARY_DIR} ${COMMON} ${PORTINC} ${KERNINC} ${TESTINC
 	${HALINC} ${PLATFORMINC} ${BOARDINC}
 	${FATFSINC}
 	${CHIBIOS}/os/various
-	ui
-	hw
-	apps
-	protocols
-	bitmaps
+	${FIRMWARE_APPLICATION}
+	${FIRMWARE_APPLICATION}/ui
+	${FIRMWARE_APPLICATION}/hw
+	${FIRMWARE_APPLICATION}/apps
+	${FIRMWARE_APPLICATION}/protocols
+	${FIRMWARE_APPLICATION}/bitmaps
 )
 
 #

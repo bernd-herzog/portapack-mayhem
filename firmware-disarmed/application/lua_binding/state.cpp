@@ -1,4 +1,4 @@
-#include "lua_binding.hpp"
+#include "state.hpp"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -13,9 +13,14 @@
 
 #include "portapack.hpp"
 
+
+namespace lua {
+
+LuaBinding lua_binding;
+
 int l_sin (lua_State *L) {
     char *text = const_cast<char *>(luaL_checkstring(L, 1));
-    strncpy(portapack::lua_binding.get_buf(), text, 16);
+    strncpy(lua_binding.get_buf(), text, 16);
     return 0;
 }
 
@@ -40,4 +45,6 @@ char * LuaBinding::get_buf() {
 
 void LuaBinding::shutdown() {
     lua_close(this->luaState);
+}
+
 }

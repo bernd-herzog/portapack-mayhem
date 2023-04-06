@@ -1,6 +1,8 @@
 #pragma once
 
-#include "lua/lua.hpp"
+#include "tiny_memory_elua/lua.hpp"
+
+namespace lua {
 
 class LuaBinding {
 public:	
@@ -15,3 +17,7 @@ private:
 	lua_State *luaState = nullptr;
 	char buf[16];
 };
+
+extern LuaBinding lua_binding;
+
+}
