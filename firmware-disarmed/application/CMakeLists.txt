@@ -132,7 +132,7 @@ set(CSRC
 	tiny_memory_elua/legc.c
 	tiny_memory_elua/lrotable.c
 	tiny_memory_elua/ldblib.c
-	tiny_memory_elua/liolib.c
+	#tiny_memory_elua/liolib.c // enable for file access
 	tiny_memory_elua/lmathlib.c
 	tiny_memory_elua/loadlib.c
 	tiny_memory_elua/loslib.c

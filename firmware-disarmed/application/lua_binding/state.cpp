@@ -35,8 +35,9 @@ void LuaBinding::init() {
 	lua_setglobal(luaState, "RegisterEvent");
 }
 
-void LuaBinding::get_str() {
+void LuaBinding::execute_lua_script(const TCHAR *path) {
     luaL_dostring(luaState, "RegisterEvent('Hello LUA');");
+    luaL_dofile2(luaState, path);
 }
 
 char * LuaBinding::get_buf() {

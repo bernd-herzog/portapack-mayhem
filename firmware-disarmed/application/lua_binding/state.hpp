@@ -10,7 +10,7 @@ public:
 
 	void init();
 	void shutdown();
-	void get_str();
+	void execute_lua_script(const TCHAR *path);
 	char * get_buf();
 
 private:

@@ -13,9 +13,6 @@ namespace ui {
 		ui::Context &context() const override;
 
 	private:
-		//SystemStatusView status_view{navigation_view};
-		//InformationView info_view{navigation_view};
-		//NavigationView navigation_view{};
 		ui::Context &context_;
     };
 }

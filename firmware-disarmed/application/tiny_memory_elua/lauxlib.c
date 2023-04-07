@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 /* This file uses only the official API of Lua.
 ** Any function declared here could be written as an application function.
 */
@@ -578,7 +577,7 @@ LUALIB_API void luaL_unref (lua_State *L, int t, int ref) {
 
 typedef struct LoadF {
   int extraline;
-  FILE *f;
+  FIL *f;
   char buff[LUAL_BUFFERSIZE];
   const char *srcp;
   size_t totsize;
@@ -596,8 +595,9 @@ static const char *getF (lua_State *L, void *ud, size_t *size) {
     return "\n";
   }
   if (lf->srcp == NULL) { // no direct access
-    if (feof(lf->f)) return NULL;
-    *size = fread(lf->buff, 1, sizeof(lf->buff), lf->f);
+    FRESULT res = f_read (lf->f, lf->buff, sizeof(lf->buff), size);
+    if (res != FR_OK) return NULL;
+    if (*size == 0) return NULL;
     return (*size > 0) ? lf->buff : NULL;
   } else { // direct access, return the whole file as a single buffer
     if (lf->totsize) {
@@ -620,51 +620,61 @@ static int errfile (lua_State *L, const char *what, int fnameindex) {
 
 
 LUALIB_API int luaL_loadfile (lua_State *L, const char *filename) {
-  LoadF lf;
-  int status, readstatus;
+  TCHAR buf[255];
+  memset(buf, 255, sizeof(TCHAR));
+  for (int i = 0; i < 255; i++) {
+    buf[i] = filename[i];
+    if (filename[i] == 0)
+      break;
+  }
+  return luaL_loadfile2(L, buf);
+}
+
+int __getc(FIL *fil) {
   int c;
-  const char *srcp = NULL;
+  size_t bytes_read;
+  FRESULT res = f_read (fil, &c, 1, &bytes_read);
+  if (res != FR_OK) return EOF;
+  if (bytes_read == 0) return EOF;
+  return c;
+}
+
+LUALIB_API int luaL_loadfile2 (lua_State *L, const TCHAR* filename) {
+  LoadF lf;
+  FRESULT res;
+  int status;
+  bool readstatus;
+  int c;
   int fnameindex = lua_gettop(L) + 1;  /* index of filename on the stack */
   lf.extraline = lf.totsize = 0;
   if (filename == NULL) {
-    lua_pushliteral(L, "=stdin");
-    lf.f = stdin;
+    return errfile(L, "filename", fnameindex);
   }
   else {
-    lua_pushfstring(L, "@%s", filename);
-    lf.f = fopen(filename, "r");
-    if (lf.f == NULL) return errfile(L, "open", fnameindex);
-#ifndef LUA_CROSS_COMPILER
-    srcp = dm_getaddr(fileno(lf.f));
-    if (srcp) {
-      fseek(lf.f, 0, SEEK_END);
-      lf.totsize = ftell(lf.f);
-      fseek(lf.f, 0, SEEK_SET);
-    }
-#endif
+    char buf[255];
+    memset(buf, 255, sizeof(char));
+    for (int i = 0; i < 255; i++) {
+      buf[i] = filename[i];
+      if (filename[i] == 0)
+        break;
+    } 
+    lua_pushfstring(L, "@%s", buf);
+    res = f_open (lf.f, filename, FA_READ);
+    if (res != FR_OK) return errfile(L, "open", fnameindex);
   }
-  c = getc(lf.f);
+  c = __getc(lf.f);
   if (c == '#') {  /* Unix exec. file? */
     lf.extraline = 1;
-    while ((c = getc(lf.f)) != EOF && c != '\n') ;  /* skip first line */
-    if (c == '\n') c = getc(lf.f);
+    while ((c = __getc(lf.f)) != EOF && c != '\n') ;  /* skip first line */
   }
-  if (c == LUA_SIGNATURE[0] && filename) {  /* binary file? */
-    lf.f = freopen(filename, "rb", lf.f);  /* reopen in binary mode */
-    if (lf.f == NULL) return errfile(L, "reopen", fnameindex);
-    /* skip eventual `#!...' */
-   while ((c = getc(lf.f)) != EOF && c != LUA_SIGNATURE[0]) ;
-   lf.extraline = 0;
-  }
-  ungetc(c, lf.f);
-  if (srcp) {
-    lf.srcp = srcp + ftell(lf.f);
-    lf.totsize -= ftell(lf.f);
-  } else
-    lf.srcp = NULL;
+
+  res = f_lseek(lf.f, 0);
+  if (res != FR_OK) return errfile(L, "f_lseek", fnameindex);
+  lf.srcp = NULL;
   status = lua_load(L, getF, &lf, lua_tostring(L, -1));
-  readstatus = ferror(lf.f);
-  if (filename) fclose(lf.f);  /* close file (even in case of errors) */
+  readstatus = (c = __getc(lf.f)) != EOF; //f__error(lf.f);
+  res = f_close(lf.f);
+  if (res != FR_OK) return errfile(L, "f_close", fnameindex);
   if (readstatus) {
     lua_settop(L, fnameindex);  /* ignore results from `lua_load' */
     return errfile(L, "read", fnameindex);
@@ -673,12 +683,10 @@ LUALIB_API int luaL_loadfile (lua_State *L, const char *filename) {
   return status;
 }
 
-
 typedef struct LoadS {
   const char *s;
   size_t size;
 } LoadS;
-
 
 static const char *getS (lua_State *L, void *ud, size_t *size) {
   LoadS *ls = (LoadS *)ud;
@@ -729,8 +737,8 @@ static int l_check_memlimit(lua_State *L, size_t needbytes) {
 
 #define CHIBIOS_DEFAULT_HEAP 0x00
 
-void chHeapFree(void *p);
-void *chHeapAlloc(void *heapp, size_t size);
+// void chHeapFree(void *p);
+// void *chHeapAlloc(void *heapp, size_t size);
 
 
 static void lua_ch_free(void *ptr){
