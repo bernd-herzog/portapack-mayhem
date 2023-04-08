@@ -15,13 +15,13 @@ class LuaBinding
 
 public:
 	template<int(nestedClassType::*SomeMember)(lua_State *L)>
-	static void registerFunc(std::string methodName); // should be called only once
+	static void registerFunc(std::string methodName);
 
 	template <int (nestedClassType::*TMethod)(lua_State *L)>
-	static int LUA_FUNCTION method_stub(lua_State *L); // selector
+	static int LUA_FUNCTION instance_finder(lua_State *L);
 
 	static void Init(std::string className, std::function<void (nestedClassType *)> callback);
-	static void CreateLuaMetaClass(lua_State *L, std::string createFunctionName); // for every lua context
+	static void CreateLuaMetaClass(lua_State *L, std::string createFunctionName);
 	static int LUA_FUNCTION index(lua_State *L);
 	static int LUA_FUNCTION index_indirect(lua_State *L);
 	static int LUA_FUNCTION CreateClass(lua_State *L);
@@ -63,7 +63,7 @@ template<int(nestedClassType::*SomeMember)(lua_State *L)>
 {
 	FunctionHelper *a = new FunctionHelper();
 	a->luaFuncName = methodName;
-	a->staticClassMemberFunc = &method_stub<SomeMember>;
+	a->staticClassMemberFunc = &instance_finder<SomeMember>;
 	someVector.push_back(a);
 }
 
@@ -93,7 +93,7 @@ template<class nestedClassType>
 
 template<class nestedClassType>
 template <int (nestedClassType::*TMethod)(lua_State *L)>
-/*static*/ int LUA_FUNCTION LuaBinding<nestedClassType>::method_stub(lua_State *L) // selector
+/*static*/ int LUA_FUNCTION LuaBinding<nestedClassType>::instance_finder(lua_State *L) // selector
 {
 //	nestedClassType *obj = static_cast<nestedClassType *>(luaL_checkudata(L, -2, className.c_str())); 
 	//int n = lua_gettop(L);
@@ -119,34 +119,35 @@ template<class nestedClassType>
 		}
 	}
 
-	//return UIElement::lua_Index(L);
-
-	//TODO: vererbung
-	return LuaBinding<nestedClassType /*::Base*/>::index_indirect(L);
-}
-
-template<class nestedClassType>
-/*static*/ int LUA_FUNCTION LuaBinding<nestedClassType>::index_indirect(lua_State *L)
-{
-	// -1: string "SetPosition" // 2nd parameter
-	// -2: userdata UITextField // first parameter
-	//nestedClassType *obj = static_cast<nestedClassType *>(lua_touserdata(L, -2));
-	const char *func = luaL_checkstring(L, -1);
-
-	for(auto a : someVector)
-	{
-		if (strcmp(func, a->luaFuncName.c_str()) == 0)
-		{
-			lua_pushcfunction(L, a->staticClassMemberFunc);
-			return 1;
-		}
-	}
-
-	//return UIElement::lua_Index(L);
-
-	//TODO: vererbung
 	return 0;
+	//return UIElement::lua_Index(L);
+
+	//TODO: vererbung
+	// return LuaBinding<nestedClassType /*::Base*/>::index_indirect(L);
 }
+
+// template<class nestedClassType>
+// /*static*/ int LUA_FUNCTION LuaBinding<nestedClassType>::index_indirect(lua_State *L)
+// {
+// 	// -1: string "SetPosition" // 2nd parameter
+// 	// -2: userdata UITextField // first parameter
+// 	//nestedClassType *obj = static_cast<nestedClassType *>(lua_touserdata(L, -2));
+// 	const char *func = luaL_checkstring(L, -1);
+
+// 	for(auto a : someVector)
+// 	{
+// 		if (strcmp(func, a->luaFuncName.c_str()) == 0)
+// 		{
+// 			lua_pushcfunction(L, a->staticClassMemberFunc);
+// 			return 1;
+// 		}
+// 	}
+
+// 	//return UIElement::lua_Index(L);
+
+// 	//TODO: vererbung
+// 	return 0;
+// }
 
 
 

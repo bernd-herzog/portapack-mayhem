@@ -4,7 +4,7 @@ function SetupUI()
 
 --    button:SetPosition(30, 30);
 --    button:SetSize(200, 30);
---    button:SetText("Start Radio");
+    button:SetText("Start Radio");
     
 end
 

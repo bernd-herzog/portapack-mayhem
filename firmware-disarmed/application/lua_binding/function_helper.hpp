@@ -10,6 +10,8 @@ namespace lua {
 class FunctionHelper
 {
 public:
+	FunctionHelper() :luaFuncName(""),staticClassMemberFunc(0) {}
+
 	std::string luaFuncName;
 	lua_CFunction staticClassMemberFunc;
 };

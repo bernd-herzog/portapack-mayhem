@@ -4,6 +4,8 @@
 #include "lua_binding/lua_binding.hpp"
 #include "ff.h"
 
+#include "lua_binding/ui/button.hpp"
+
 namespace ui {
 static constexpr ui::Style style_default {
 	.font = ui::font::fixed_8x16,
@@ -53,7 +55,6 @@ Context& LuaView::context() const {
 MakeWrapper(LuaErrorWrapper, (lua_State *L), (L), LuaView, int);
 
 void LuaView::LuaInit(lua_State *L) {
-	typedef lua::LuaBinding<ui::Button> ButtonBinding;
     int i = 2;
 
     this->add_children({new ui::Labels({{{2,i++*20},"LuaInit();", Color::white()}})});
@@ -64,7 +65,8 @@ void LuaView::LuaInit(lua_State *L) {
     this->add_children({new ui::Labels({{{2,i++*20},"lua_atpanic();", Color::white()}})});
 
 
-    ButtonBinding::Init("Button", [this](ui::Button * s) {
+	typedef lua::LuaBinding<luaui::Button> ButtonBinding;
+    ButtonBinding::Init("Button", [this](luaui::Button * s) {
 
         this->add_children({new ui::Labels({{{2,9*20},"lua CreateButton();", Color::white()}})});
 
@@ -76,7 +78,7 @@ void LuaView::LuaInit(lua_State *L) {
     });
 
     this->add_children({new ui::Labels({{{2,i++*20},"ButtonBinding::Init();", Color::white()}})});
-    //ButtonBinding::registerFunc<>("SetPosition"); ...
+    ButtonBinding::registerFunc<&luaui::Button::lua_SetText>("SetText"); 
 
     ButtonBinding::CreateLuaMetaClass(L, "CreateButton");
 
@@ -93,7 +95,6 @@ void LuaView::LuaInit(lua_State *L) {
 
     this->add_children({new ui::Labels({{{2,i++*20},"execute_lua_script();", Color::white()}})});
 }
-
 
 int LuaView::lua_at_panic(lua_State *L) {
 	luaError = lua_tostring(L, -1);
