@@ -37,14 +37,14 @@ template<class nestedClassType>
 std::function<void (nestedClassType *)> LuaBinding<nestedClassType>::callback;
 
 template<class nestedClassType>
-/* static */ void LuaBinding<nestedClassType>::Init(std::string className, std::function<void (nestedClassType *)> callback) // should be called only once
+/* static */ void LuaBinding<nestedClassType>::Init(std::string className, std::function<void (nestedClassType *)> callback)
 {
 	LuaBinding<nestedClassType>::className = className;
 	LuaBinding<nestedClassType>::callback = callback;
 }
 
 template<class nestedClassType>
-/* static */ void LuaBinding<nestedClassType>::CreateLuaMetaClass(lua_State *L, std::string createFunctionName) // for every lua context
+/* static */ void LuaBinding<nestedClassType>::CreateLuaMetaClass(lua_State *L, std::string createFunctionName)
 {
     //new metatable
 	luaL_newmetatable(L, className.c_str());
@@ -59,7 +59,7 @@ template<class nestedClassType>
 
 template<class nestedClassType>
 template<int(nestedClassType::*SomeMember)(lua_State *L)>
-/*static*/ void LuaBinding<nestedClassType>::registerFunc(std::string methodName) // should be called only once
+/*static*/ void LuaBinding<nestedClassType>::registerFunc(std::string methodName)
 {
 	FunctionHelper *a = new FunctionHelper();
 	a->luaFuncName = methodName;
@@ -95,8 +95,6 @@ template<class nestedClassType>
 template <int (nestedClassType::*TMethod)(lua_State *L)>
 /*static*/ int LUA_FUNCTION LuaBinding<nestedClassType>::instance_finder(lua_State *L) // selector
 {
-//	nestedClassType *obj = static_cast<nestedClassType *>(luaL_checkudata(L, -2, className.c_str())); 
-	//int n = lua_gettop(L);
 	nestedClassType **obj = static_cast<nestedClassType **>(lua_touserdata(L, 1)); 
 	return (*obj->*TMethod)(L);
 }

@@ -3,6 +3,8 @@
 #include "lua_binding/lua_state.hpp"
 #include "lua_binding/lua_binding.hpp"
 #include "ff.h"
+#include "baseband_api.hpp"
+#include "core_control.hpp"
 
 #include "lua_binding/ui/button.hpp"
 
@@ -21,7 +23,6 @@ LuaView::LuaView(
     luaError("")
 {
     set_style(&style_default);
-    this->add_children({new ui::Labels({{{2,8},"ctor();", Color::white()}})});
 
     FIL lua_file;
     if (f_open(&lua_file, reinterpret_cast<const TCHAR*>(u"/APPS/main.lua"), FA_READ) != FR_OK) {
@@ -35,11 +36,16 @@ LuaView::LuaView(
     f_close(&lua_file);
 
 	add_children({
-		&button_run
+		&button_run,
+        &button_sd
 	});
 
     button_run.on_select = [this](Button&) {
         this->LuaInit(lua::lua_state.get_state());
+    };
+
+    button_sd.on_select = [this](Button&) {
+        this->ActivateSDMode();
     };
 }
 
@@ -55,25 +61,31 @@ void LuaView::LuaInit(lua_State *L) {
  	lua_atpanic(L, GetWrapper(LuaErrorWrapper, &LuaView::lua_at_panic));
     
     int r = setjmp(jumpBuffer);
-    if (r != 0)
-    {
-        this->add_children({new ui::Labels({{{2,2*20},"setjmp();", Color::white()}})});
+    if (r != 0) {
+        constexpr int line_chars = 28;
+        for (unsigned int i = 0; i <= (luaError.length()-1)/line_chars; i++)
+            this->add_children({new ui::Labels({{{2, (int)i*20}, luaError.substr(i*line_chars, line_chars), Color::white()}})});
+
         return;
     }
 
     lua::lua_state.execute_lua_script(reinterpret_cast<const TCHAR*>(u"/APPS/main.lua"));
-
-    this->add_children({new ui::Labels({{{2,3*20},"execute_lua_script();", Color::white()}})});
 }
 
 int LuaView::lua_at_panic(lua_State *L) {
 	luaError = lua_tostring(L, -1);
-    
-    this->add_children({new ui::Labels({{{2,8*20}, luaError, Color::white()}})});
-
 	lua_pop(L, 1);
 	longjmp(jumpBuffer, 1);
 	return 1;
+}
+
+void LuaView::ActivateSDMode() {
+    sdcDisconnect(&SDCD1);
+    sdcStop(&SDCD1);
+
+    portapack::shutdown(true);
+    m4_init(portapack::spi_flash::image_tag_usb_sd, portapack::memory::map::m4_code, false);
+    m0_halt();
 }
 
 }

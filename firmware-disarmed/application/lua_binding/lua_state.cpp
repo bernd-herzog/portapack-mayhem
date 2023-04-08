@@ -35,8 +35,8 @@ void LuaState::init() {
 
 void LuaState::execute_lua_script(const TCHAR *path) {
     FIL lua_file;
-    if (f_open(&lua_file, reinterpret_cast<const TCHAR*>(u"/APPS/main.lua"), FA_READ) != FR_OK) {
-         chDbgPanic("no main.lua");
+    if (f_open(&lua_file, reinterpret_cast<const TCHAR*>(path), FA_READ) != FR_OK) {
+         chDbgPanic("file not found");
     }
 
     size_t bytes_read;
@@ -47,8 +47,8 @@ void LuaState::execute_lua_script(const TCHAR *path) {
 
     f_close(&lua_file);
 
-    luaL_dostring(luaState, reinterpret_cast<const char*>(data_buffer));
-    //luaL_dofile2(luaState, path);
+    luaL_loadstring(luaState, reinterpret_cast<const char*>(data_buffer));
+    lua_call(luaState, 0, LUA_MULTRET);
 }
 
 char * LuaState::get_buf() {

@@ -18,6 +18,7 @@ public:
 	ui::Context &context() const override;
 
 	void LuaInit(lua_State *L);
+	void ActivateSDMode();
 
 private:
 	ui::Context &context_;
@@ -27,9 +28,13 @@ private:
 	int lua_at_panic(lua_State *L);
 
 	Button button_run {
-		{ 9 * 8, 15 * 16, 12 * 8, 3 * 16 },
+		{ 1 * 8, 15 * 16, 12 * 8, 3 * 16 },
 		"Run" 
-	};		
+	};
+	Button button_sd {
+		{ 14 * 8, 15 * 16, 12 * 8, 3 * 16 },
+		"SD" 
+	};
 
 };
 }
