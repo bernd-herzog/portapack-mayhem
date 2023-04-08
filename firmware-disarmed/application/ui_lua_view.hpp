@@ -1,7 +1,5 @@
 #pragma once
 
-#include <setjmp.h>
-
 #include "tiny_memory_elua/lua.hpp"
 #include "lua_binding/lua_wrapper.hpp"
 
@@ -22,10 +20,6 @@ public:
 
 private:
 	ui::Context &context_;
-
-	std::string luaError;
-	jmp_buf jumpBuffer;
-	int lua_at_panic(lua_State *L);
 
 	Button button_run {
 		{ 1 * 8, 15 * 16, 12 * 8, 3 * 16 },

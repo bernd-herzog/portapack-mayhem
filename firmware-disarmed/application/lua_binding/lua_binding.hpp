@@ -84,7 +84,7 @@ template<class nestedClassType>
     // TODO: impelment for events on click...
 	int refId = luaL_ref(L, LUA_REGISTRYINDEX);
 	(void)refId;
-	// button->SetRefID(refId); // add dictionary refID to object
+	button->SetRefID(refId); // add dictionary refID to object
 
 	callback(button);
 

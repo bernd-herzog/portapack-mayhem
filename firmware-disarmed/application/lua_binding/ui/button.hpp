@@ -12,5 +12,14 @@ class Button : public ui::Button {
 
         int lua_SetText(lua_State *L);
         int lua_SetRect(lua_State *L);
+        int lua_OnClick(lua_State *L);
+
+        inline void SetRefID(int ref_id) {this->ref_id = ref_id;}
+        inline int GetRefID(){return this->ref_id;}
+        inline int GetClickRefID(){return this->click_ref_id;}
+    private:
+        int ref_id;
+        int click_ref_id;
+    //     lua_CFunction button_click_handler;
 };
 }

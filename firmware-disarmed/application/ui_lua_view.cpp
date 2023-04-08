@@ -19,8 +19,7 @@ LuaView::LuaView(
     Context& context,
     const Rect parent_rect
 ) : View { parent_rect },
-    context_(context),
-    luaError("")
+    context_(context)
 {
     set_style(&style_default);
 
@@ -53,30 +52,17 @@ Context& LuaView::context() const {
     return context_;
 }
 
-MakeWrapper(LuaErrorWrapper, (lua_State *L), (L), LuaView, int);
 
 void LuaView::LuaInit(lua_State *L) {
     lua_ui::Button::initialize_luabinding(L, this);
 
- 	lua_atpanic(L, GetWrapper(LuaErrorWrapper, &LuaView::lua_at_panic));
-    
-    int r = setjmp(jumpBuffer);
-    if (r != 0) {
+    lua::lua_state.on_error = [this](std::string luaError) {
         constexpr int line_chars = 28;
         for (unsigned int i = 0; i <= (luaError.length()-1)/line_chars; i++)
             this->add_children({new ui::Labels({{{2, (int)i*20}, luaError.substr(i*line_chars, line_chars), Color::white()}})});
-
-        return;
-    }
+    };
 
     lua::lua_state.execute_lua_script(reinterpret_cast<const TCHAR*>(u"/APPS/main.lua"));
-}
-
-int LuaView::lua_at_panic(lua_State *L) {
-	luaError = lua_tostring(L, -1);
-	lua_pop(L, 1);
-	longjmp(jumpBuffer, 1);
-	return 1;
 }
 
 void LuaView::ActivateSDMode() {
