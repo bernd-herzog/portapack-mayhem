@@ -44,6 +44,9 @@ void draw_guru_meditation_header(uint8_t source, const char *hint) {
         .foreground = ui::Color::white()
     };
 
+    // portapack::backlight()->on();
+    // portapack::display.wake();
+
     painter.fill_rectangle(
         { 0, 0, portapack::display.width(), portapack::display.height() },
         ui::Color::red()

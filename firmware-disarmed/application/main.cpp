@@ -144,7 +144,7 @@ Continuous (Fox-oring)
 
 #include "rffc507x.hpp"      /* c/m, avoiding initial short ON Ant_DC_Bias pulse, from cold reset  */
 #include "ui_lua_view.hpp"
-#include "lua_binding/state.hpp"
+#include "lua_binding/lua_state.hpp"
 
 rffc507x::RFFC507x first_if;
 
@@ -174,7 +174,7 @@ int main(void) {
 
 		lcd_frame_sync_configure();
 		rtc_interrupt_enable();
-		lua::lua_binding.init();
+		lua::lua_state.init();
 
 		event_loop();
 
