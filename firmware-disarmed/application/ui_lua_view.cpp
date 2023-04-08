@@ -41,11 +41,6 @@ LuaView::LuaView(
     button_run.on_select = [this](Button&) {
         this->LuaInit(lua::lua_state.get_state());
     };
-    /////////////////////
-    //lua_pushcfunction(luaState, l_sin);
-	//lua_setglobal(luaState, "RegisterEvent");
-
-    //lua::lua_state.register_function("CreateButton", this->create_button);
 }
 
 Context& LuaView::context() const {
@@ -55,45 +50,20 @@ Context& LuaView::context() const {
 MakeWrapper(LuaErrorWrapper, (lua_State *L), (L), LuaView, int);
 
 void LuaView::LuaInit(lua_State *L) {
-    int i = 2;
+    lua_ui::Button::initialize_luabinding(L, this);
 
-    this->add_children({new ui::Labels({{{2,i++*20},"LuaInit();", Color::white()}})});
-
-	lua_atpanic(L, GetWrapper(LuaErrorWrapper, &LuaView::lua_at_panic));
-
-
-    this->add_children({new ui::Labels({{{2,i++*20},"lua_atpanic();", Color::white()}})});
-
-
-	typedef lua::LuaBinding<luaui::Button> ButtonBinding;
-    ButtonBinding::Init("Button", [this](luaui::Button * s) {
-
-        this->add_children({new ui::Labels({{{2,9*20},"lua CreateButton();", Color::white()}})});
-
-        s->set_text("TEST");
-        s->set_parent(this);
-        s->set_parent_rect({{40, 40}, {60, 60}});
-
-        this->add_children({s});
-    });
-
-    this->add_children({new ui::Labels({{{2,i++*20},"ButtonBinding::Init();", Color::white()}})});
-    ButtonBinding::registerFunc<&luaui::Button::lua_SetText>("SetText"); 
-
-    ButtonBinding::CreateLuaMetaClass(L, "CreateButton");
-
-    this->add_children({new ui::Labels({{{2,i++*20},"CreateLuaMetaClass();", Color::white()}})});
-
+ 	lua_atpanic(L, GetWrapper(LuaErrorWrapper, &LuaView::lua_at_panic));
+    
     int r = setjmp(jumpBuffer);
     if (r != 0)
     {
-        this->add_children({new ui::Labels({{{2,i++*20},"setjmp();", Color::white()}})});
+        this->add_children({new ui::Labels({{{2,2*20},"setjmp();", Color::white()}})});
         return;
     }
 
     lua::lua_state.execute_lua_script(reinterpret_cast<const TCHAR*>(u"/APPS/main.lua"));
 
-    this->add_children({new ui::Labels({{{2,i++*20},"execute_lua_script();", Color::white()}})});
+    this->add_children({new ui::Labels({{{2,3*20},"execute_lua_script();", Color::white()}})});
 }
 
 int LuaView::lua_at_panic(lua_State *L) {

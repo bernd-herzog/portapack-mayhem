@@ -333,6 +333,7 @@ set(CPPSRC
 	${CPLD_20170522_DATA_CPP}
 	${HACKRF_CPLD_DATA_CPP}
 	lua_binding/lua_state.cpp
+	lua_binding/ui/button.cpp
 	ui_lua_view.cpp
 )
 

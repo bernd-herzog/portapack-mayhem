@@ -1,14 +1,15 @@
 #pragma once
 
-#include "ui_widget.hpp"
+#include "button.hpp"
+#include "ui_lua_view.hpp"
 
-namespace luaui {
+namespace lua_ui {
     class Button : public ui::Button {
         public:
-            inline int lua_SetText(lua_State *L){
-                auto text = luaL_checkstring(L, 2);
-                this->set_text(text);
-                return 0;
-        }
+            static void initialize_luabinding(lua_State *L, ui::LuaView *luaView);
+
+            Button();
+
+            int lua_SetText(lua_State *L);
     };
 }
