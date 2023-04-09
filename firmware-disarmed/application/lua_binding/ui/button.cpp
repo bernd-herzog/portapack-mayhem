@@ -4,21 +4,21 @@
 
 namespace lua_ui {
 
-/* static */ void Button::initialize_lua_binding(lua_State *L, ui::LuaView *luaView) {
+/* static */ void Button::initialize_lua_binding(lua_State *L, ui::View *parent) {
 	typedef lua::LuaBinding<lua_ui::Button> ButtonBinding;
 
-    ButtonBinding::Init("Button", [luaView](lua_ui::Button * s) {
-        s->set_parent(luaView);
-        luaView->add_children({s});
+    ButtonBinding::initialize_object_creation("Button", [parent](lua_ui::Button *created_button) {
+        created_button->set_parent(parent);
+        parent->add_children({created_button});
     });
 
-    ButtonBinding::registerFunc<&lua_ui::Button::lua_set_text>("SetText");
-    ButtonBinding::registerFunc<&lua_ui::Button::lua_set_rect>("SetRect");
-    ButtonBinding::registerFunc<&lua_ui::Button::lua_on_click>("OnClick");
-    ButtonBinding::CreateLuaMetaClass(L, "CreateButton");
+    ButtonBinding::regiser_object_creation_function(L, "CreateButton");
+    ButtonBinding::register_lua_function<&lua_ui::Button::lua_set_text>("SetText");
+    ButtonBinding::register_lua_function<&lua_ui::Button::lua_set_rect>("SetRect");
+    ButtonBinding::register_lua_function<&lua_ui::Button::lua_on_click>("OnClick");
 }
 
-Button::Button() : click_event_ref_id(0) {
+Button::Button() : ui::Button { } {
     this->on_select = [](ui::Button& button) {
         lua_ui::Button *b = (lua_ui::Button *)(&button);
         int click_ref_id = b->get_click_event_ref_id();
@@ -30,8 +30,8 @@ Button::Button() : click_event_ref_id(0) {
 
 LUA_FUNCTION int Button::lua_set_text(lua_State *L) {
     auto text = luaL_checkstring(L, 2);
-    this->set_text(text);
 
+    this->set_text(text);
     return 0;
 }
 
@@ -42,7 +42,6 @@ LUA_FUNCTION int Button::lua_set_rect(lua_State *L) {
     auto h = luaL_checkint(L, 5);
 
     this->set_parent_rect({{x,y},{w,h}});
-
     return 0;
 }
 
@@ -55,8 +54,6 @@ LUA_FUNCTION int Button::lua_on_click(lua_State *L) {
     }
 
    	this->click_event_ref_id = luaL_ref(L, LUA_REGISTRYINDEX);
-
-
     return 0;
 }
 

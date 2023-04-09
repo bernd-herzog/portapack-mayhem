@@ -5,21 +5,24 @@
 
 #include "ui.hpp"
 #include "ui_widget.hpp"
+#include "ui_navigation.hpp"
 
 namespace ui {
-class LuaView : public View {
+class LuaSystemView : public View {
 public:
-	LuaView(
+	LuaSystemView(
 		ui::Context &context,
 		const ui::Rect parent_rect);
 
 	ui::Context &context() const override;
+	void focus() override;
 
 	void LuaInit(lua_State *L);
 	void ActivateSDMode();
 
 private:
 	ui::Context &context_;
+	ui::NavigationView navigation_view{};
 
 	Button button_run {
 		{ 1 * 8, 15 * 16, 12 * 8, 3 * 16 },

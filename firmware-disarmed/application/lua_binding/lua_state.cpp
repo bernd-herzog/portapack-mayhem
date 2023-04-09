@@ -12,7 +12,7 @@
 #include "ch.h"
 
 #include "portapack.hpp"
-#include "ui_lua_view.hpp"
+#include "ui_lua_system_view.hpp"
 #include "portapack_shared_memory.hpp"
 
 namespace lua {
@@ -72,7 +72,7 @@ void LuaState::shutdown() {
     lua_close(get_state());
 }
 
-int LuaState::lua_at_panic(lua_State *L) {
+LUA_FUNCTION int LuaState::lua_at_panic(lua_State *L) {
 	luaError = lua_tostring(L, -1);
 	lua_pop(L, 1);
 	longjmp(jumpBuffer, 1);

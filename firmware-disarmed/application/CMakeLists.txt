@@ -238,7 +238,7 @@ set(CPPSRC
 	${FIRMWARE_APPLICATION}/hw/spi_pp.cpp
 	${FIRMWARE_APPLICATION}/hw/touch_adc.cpp
 	#${FIRMWARE_APPLICATION}/ui_baseband_stats_view.cpp
-	#${FIRMWARE_APPLICATION}/ui_navigation.cpp
+	${FIRMWARE_APPLICATION}/ui_navigation.cpp
 	#${FIRMWARE_APPLICATION}/ui_playdead.cpp
 	#${FIRMWARE_APPLICATION}/ui_record_view.cpp
 	#${FIRMWARE_APPLICATION}/ui_sd_card_status_view.cpp
@@ -334,7 +334,9 @@ set(CPPSRC
 	${HACKRF_CPLD_DATA_CPP}
 	lua_binding/lua_state.cpp
 	lua_binding/ui/button.cpp
-	ui_lua_view.cpp
+	lua_binding/ui/label.cpp
+	lua_binding/ui/textfield.cpp
+	ui_lua_system_view.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.

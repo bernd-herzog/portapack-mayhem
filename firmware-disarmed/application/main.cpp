@@ -143,14 +143,14 @@ Continuous (Fox-oring)
 #include <string.h>
 
 #include "rffc507x.hpp"      /* c/m, avoiding initial short ON Ant_DC_Bias pulse, from cold reset  */
-#include "ui_lua_view.hpp"
+#include "ui_lua_system_view.hpp"
 #include "lua_binding/lua_state.hpp"
 
 rffc507x::RFFC507x first_if;
 
 static void event_loop() {
 	ui::Context context;
-	ui::LuaView lua_view {
+	ui::LuaSystemView lua_view {
 		context,
 		portapack::display.screen_rect()
 	};

@@ -6,6 +6,7 @@
 
 #include "tiny_memory_elua/lua.hpp"
 #include "lua_binding/lua_wrapper.hpp"
+#include "lua_binding/function_helper.hpp"
 
 namespace lua {
 
@@ -29,7 +30,7 @@ private:
 
 	std::string luaError;
 	jmp_buf jumpBuffer;
-	int lua_at_panic(lua_State *L);
+	LUA_FUNCTION int lua_at_panic(lua_State *L);
 };
 
 extern LuaState lua_state;

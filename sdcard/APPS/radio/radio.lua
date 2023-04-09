@@ -37,13 +37,11 @@ function SetupHackRfOne()
         audioDecimation = fmRate / audioRate,
     };
 
-    fmStream = CreateDcBlocker {
+    local audioStream = CreateDcBlocker {
         inputStream = fmStream,
     }
 
-    CreateAudioSink(fmStream);
-
-    hackRfProcess:SetPipeline(input, output);
+    CreateAudioSink(audioStream);
 end
 
 function OnFrame()

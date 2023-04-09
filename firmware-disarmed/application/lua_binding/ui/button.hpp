@@ -1,13 +1,12 @@
 #pragma once
 
-#include "button.hpp"
-#include "ui_lua_view.hpp"
+#include "ui_lua_system_view.hpp"
 #include "lua_binding/lua_binding.hpp"
 
 namespace lua_ui {
 class Button : public ui::Button {
     public:
-        static void initialize_lua_binding(lua_State *L, ui::LuaView *luaView);
+        static void initialize_lua_binding(lua_State *L, ui::View *parent);
 
         Button();
 
@@ -18,6 +17,6 @@ class Button : public ui::Button {
         int get_click_event_ref_id() { return click_event_ref_id; }
 
     private:
-        int click_event_ref_id;
+        int click_event_ref_id = 0;
 };
 }
