@@ -27,17 +27,9 @@
 
 #define USB_VENDOR_ID (0x1D50)
 
-#ifdef HACKRF_ONE
-	#define USB_PRODUCT_ID (0x6089)
-#elif JAWBREAKER
-	#define USB_PRODUCT_ID (0x604B)
-#elif RAD1O
-	#define USB_PRODUCT_ID (0xCC15)
-#else
-	#define USB_PRODUCT_ID (0xFFFF)
-#endif
+#define USB_PRODUCT_ID (0xCC42)
 
-#define USB_API_VERSION (0x0107)
+#define USB_API_VERSION (0x0127)
 
 #define USB_WORD(x) (x & 0xFF), ((x >> 8) & 0xFF)
 
@@ -94,9 +86,9 @@ uint8_t usb_descriptor_configuration_full_speed[] = {
 	0x00,                          // bInterfaceNumber
 	0x00,                          // bAlternateSetting
 	0x02,                          // bNumEndpoints
-	0x08,                          // bInterfaceClass: vendor-specific
-	0x06,                          // bInterfaceSubClass
-	0x50,                          // bInterfaceProtocol: vendor-specific
+	0x08,                          // bInterfaceClass: 0x08 == MSD
+	0x06,                          // bInterfaceSubClass: 0x06 == SCSI
+	0x50,                          // bInterfaceProtocol: 0x50 == BBB bulk only
 	0x00,                          // iInterface
 
 	7,                                // bLength
@@ -131,9 +123,9 @@ uint8_t usb_descriptor_configuration_high_speed[] = {
 	0x00,                          // bInterfaceNumber
 	0x00,                          // bAlternateSetting
 	0x02,                          // bNumEndpoints
-	0x08,                          // bInterfaceClass: vendor-specific
-	0x06,                          // bInterfaceSubClass
-	0x50,                          // bInterfaceProtocol: vendor-specific
+	0x08,                          // bInterfaceClass: 0x08 == MSD
+	0x06,                          // bInterfaceSubClass: 0x06 == SCSI
+	0x50,                          // bInterfaceProtocol: 0x50 == BBB bulk only
 	0x00,                          // iInterface
 
 	7,                                // bLength
