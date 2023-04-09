@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cstring>
 
 #include "tiny_memory_elua/lua.hpp"
 #include "lua_binding/function_helper.hpp"

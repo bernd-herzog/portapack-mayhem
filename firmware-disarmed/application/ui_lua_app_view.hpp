@@ -8,28 +8,29 @@
 #include "ui_widget.hpp"
 #include "ui_navigation.hpp"
 
-
 namespace ui {
 class LuaAppView : public ui::View {
 public:
 	LuaAppView(NavigationView& nav);
 
 	void focus() override;
+	void paint(Painter& painter) override;
 
 	void LuaInit(lua_State *L);
 	void ActivateSDMode();
 
 private:
+    bool lua_initialized = false;
 	NavigationView& nav_;
 
 	Button button_run {
-		{ 1 * 8, 15 * 16, 12 * 8, 3 * 16 },
-		"Run" 
-	};
-	Button button_sd {
-		{ 14 * 8, 15 * 16, 12 * 8, 3 * 16 },
-		"SD" 
+		{ 2 * 8, 14 * 16, 26 * 8, 2 * 16 },
+		"Restart App"
 	};
 
+	Button button_sd {
+		{ 2 * 8, 17 * 16, 26 * 8, 2 * 16 },
+		"Start SD over USB"
+	};
 };
 }

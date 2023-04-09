@@ -647,18 +647,20 @@ LUALIB_API int luaL_loadfile2 (lua_State *L, const TCHAR* filename) {
   int c;
   int fnameindex = lua_gettop(L) + 1;  /* index of filename on the stack */
   lf.extraline = lf.totsize = 0;
+  FIL fil;
+  lf.f = &fil;
   if (filename == NULL) {
     return errfile(L, "filename", fnameindex);
   }
   else {
-    char buf[255];
-    memset(buf, 255, sizeof(char));
-    for (int i = 0; i < 255; i++) {
-      buf[i] = filename[i];
-      if (filename[i] == 0)
-        break;
-    } 
-    lua_pushfstring(L, "@%s", buf);
+    // char buf[255];
+    // memset(buf, 255, sizeof(char));
+    // for (int i = 0; i < 255; i++) {
+    //   buf[i] = filename[i];
+    //   if (filename[i] == 0)
+    //     break;
+    // } 
+    lua_pushfstring(L, "@%s", "file.lua");
     res = f_open (lf.f, filename, FA_READ);
     if (res != FR_OK) return errfile(L, "open", fnameindex);
   }

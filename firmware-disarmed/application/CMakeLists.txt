@@ -248,7 +248,7 @@ set(CPPSRC
 	${FIRMWARE_APPLICATION}/ui/ui_font_fixed_8x16.cpp
 	#${FIRMWARE_APPLICATION}/ui/ui_geomap.cpp
     #${FIRMWARE_APPLICATION}/ui/ui_qrcode.cpp
-	#${FIRMWARE_APPLICATION}/ui/ui_menu.cpp
+	${FIRMWARE_APPLICATION}/ui/ui_menu.cpp
 	#${FIRMWARE_APPLICATION}/ui/ui_btngrid.cpp
 	#${FIRMWARE_APPLICATION}/ui/ui_receiver.cpp
 	#${FIRMWARE_APPLICATION}/ui/ui_rssi.cpp
@@ -270,7 +270,7 @@ set(CPPSRC
 	# ${FIRMWARE_APPLICATION}/apps/ui_debug.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_encoders.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_fileman.cpp
-	# ${FIRMWARE_APPLICATION}/apps/ui_flash_utility.cpp
+	${FIRMWARE_APPLICATION}/apps/ui_flash_utility.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_sd_over_usb.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_freqman.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_jammer.cpp
@@ -336,6 +336,7 @@ set(CPPSRC
 	lua_binding/ui/button.cpp
 	lua_binding/ui/label.cpp
 	lua_binding/ui/textfield.cpp
+	lua_binding/hw/firmware.cpp
 	ui_lua_system_view.cpp
 	ui_lua_app_view.cpp
 )

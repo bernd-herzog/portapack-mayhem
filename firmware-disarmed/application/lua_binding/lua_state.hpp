@@ -23,12 +23,14 @@ public:
 	void execute_lua_function(int ref_id);
 	inline lua_State *get_state() {return luaState;}
 
-	std::function<void (std::string)> on_error;
+	std::function<void (std::string, int)> on_lua_error;
 
 private:
 	lua_State *luaState;
 
 	std::string luaError;
+	int luaErrorLine = 0;
+
 	jmp_buf jumpBuffer;
 	LUA_FUNCTION int lua_at_panic(lua_State *L);
 };

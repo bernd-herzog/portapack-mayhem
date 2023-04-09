@@ -2,9 +2,11 @@
 
 #include "lua_binding/ui/button.hpp"
 #include "lua_binding/ui/label.hpp"
+#include "lua_binding/hw/firmware.hpp"
 
 #include "baseband_api.hpp"
 #include "core_control.hpp"
+#include "string_format.hpp"
 
 namespace ui {
 
@@ -15,9 +17,6 @@ LuaAppView::LuaAppView(NavigationView& nav) : nav_ (nav) {
 	});
 
     button_run.on_select = [this](Button&) {
-        this->remove_children(children());
-        this->set_dirty();
-        this->LuaInit(lua::lua_state.get_state());
     };
 
     button_sd.on_select = [this](Button&) {
@@ -29,15 +28,39 @@ void LuaAppView::focus() {
 	button_run.focus();
 }
 
+void LuaAppView::paint(Painter& painter) {
+    /* delayed execute */
+    if (lua_initialized == false) {
+        lua_initialized = true;
+        //this->remove_children(children());
+        this->LuaInit(lua::lua_state.get_state());
+        this->set_dirty();
+    }
+
+    ui::View::paint(painter);
+}
 
 void LuaAppView::LuaInit(lua_State *L) {
     lua_ui::Button::initialize_lua_binding(L, this);
     lua_ui::Label::initialize_lua_binding(L, this);
+    lua_hw::Firmware::initialize_lua_binding(L, this->nav_);
 
-    lua::lua_state.on_error = [this](std::string luaError) {
+    lua::lua_state.on_lua_error = [this](std::string luaError, int line) {
         constexpr int line_chars = 28;
-        for (unsigned int i = 0; i <= (luaError.length()-1)/line_chars; i++)
-            this->add_children({new ui::Labels({{{2, (int)i*20}, luaError.substr(i*line_chars, line_chars), Color::white()}})});
+        unsigned int i = 0;
+        for (; i <= (luaError.length()-1)/line_chars; i++) {
+            this->add_children({
+                new ui::Labels({{{2, (int)i*20}, luaError.substr(i*line_chars, line_chars), Color::white()}}),
+                    &button_run,
+                    &button_sd
+                });
+        }
+
+        this->add_children({
+            new ui::Labels({{{2, (int)i*20}, to_string_dec_int(line), Color::white()}}),
+                &button_run,
+                &button_sd
+            });
     };
 
     lua::lua_state.execute_lua_script(reinterpret_cast<const TCHAR*>(u"/APPS/main.lua"));
