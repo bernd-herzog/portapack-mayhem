@@ -337,6 +337,7 @@ set(CPPSRC
 	lua_binding/ui/label.cpp
 	lua_binding/ui/textfield.cpp
 	ui_lua_system_view.cpp
+	ui_lua_app_view.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.
