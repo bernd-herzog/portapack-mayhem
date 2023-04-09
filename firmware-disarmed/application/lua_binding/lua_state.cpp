@@ -20,18 +20,14 @@ namespace lua {
 LuaState lua_state;
 MakeWrapper(LuaErrorWrapper, (lua_State *L), (L), LuaState, int);
 
-int l_sin (lua_State *L) {
-    char *text = const_cast<char *>(luaL_checkstring(L, 1));
-    strncpy(lua_state.get_buf(), text, 16);
-    return 0;
-}
-
-LuaState::LuaState() : luaError("") {
+LuaState::LuaState() :
+    on_error([](std::string){}),
+    luaState(luaL_newstate()),
+    luaError("") {
 }
 
 void LuaState::init() {
-    this->luaState = luaL_newstate();
-	luaL_openlibs(luaState);
+	luaL_openlibs(get_state());
 }
 
 void LuaState::execute_lua_script(const TCHAR *path) {
@@ -41,6 +37,7 @@ void LuaState::execute_lua_script(const TCHAR *path) {
     }
 
     size_t bytes_read;
+    //TODO: fix file reading
     uint8_t *data_buffer = &shared_memory.bb_data.data[0]; // TODO: dont use shared memory for everything
 
     if (f_read(&lua_file, data_buffer, 512, &bytes_read) != FR_OK) chDbgPanic("no data");
@@ -48,15 +45,15 @@ void LuaState::execute_lua_script(const TCHAR *path) {
 
     f_close(&lua_file);
 
- 	lua_atpanic(luaState, GetWrapper(LuaErrorWrapper, &LuaState::lua_at_panic));
+ 	lua_atpanic(get_state(), GetWrapper(LuaErrorWrapper, &LuaState::lua_at_panic));
 
     int r = setjmp(jumpBuffer);
     if (r != 0) {
         this->on_error(luaError);
     }
     else {
-        luaL_loadstring(luaState, reinterpret_cast<const char*>(data_buffer));
-        lua_call(luaState, 0, LUA_MULTRET);
+        luaL_loadstring(get_state(), reinterpret_cast<const char*>(data_buffer));
+        lua_call(get_state(), 0, LUA_MULTRET);
     }
 }
 
@@ -66,21 +63,14 @@ void LuaState::execute_lua_function(int ref_id) {
         this->on_error(luaError);
     }
     else {
-        lua_rawgeti(this->luaState, LUA_REGISTRYINDEX, ref_id);
-        lua_call(this->luaState, 0, 0);
-
-        //function(lua_state.luaState);
+        lua_rawgeti(get_state(), LUA_REGISTRYINDEX, ref_id);
+        lua_call(get_state(), 0, 0);
    }
 }
 
-char * LuaState::get_buf() {
-    return this->buf;
-}
-
 void LuaState::shutdown() {
-    lua_close(this->luaState);
+    lua_close(get_state());
 }
-
 
 int LuaState::lua_at_panic(lua_State *L) {
 	luaError = lua_tostring(L, -1);
@@ -88,6 +78,5 @@ int LuaState::lua_at_panic(lua_State *L) {
 	longjmp(jumpBuffer, 1);
 	return 1;
 }
-
 
 }

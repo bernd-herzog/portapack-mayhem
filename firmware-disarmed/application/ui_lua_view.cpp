@@ -54,7 +54,7 @@ Context& LuaView::context() const {
 
 
 void LuaView::LuaInit(lua_State *L) {
-    lua_ui::Button::initialize_luabinding(L, this);
+    lua_ui::Button::initialize_lua_binding(L, this);
 
     lua::lua_state.on_error = [this](std::string luaError) {
         constexpr int line_chars = 28;

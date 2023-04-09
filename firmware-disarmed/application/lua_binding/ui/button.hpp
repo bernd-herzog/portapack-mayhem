@@ -2,24 +2,22 @@
 
 #include "button.hpp"
 #include "ui_lua_view.hpp"
+#include "lua_binding/lua_binding.hpp"
 
 namespace lua_ui {
 class Button : public ui::Button {
     public:
-        static void initialize_luabinding(lua_State *L, ui::LuaView *luaView);
+        static void initialize_lua_binding(lua_State *L, ui::LuaView *luaView);
 
         Button();
 
-        int lua_SetText(lua_State *L);
-        int lua_SetRect(lua_State *L);
-        int lua_OnClick(lua_State *L);
+        LUA_FUNCTION int lua_set_text(lua_State *L);
+        LUA_FUNCTION int lua_set_rect(lua_State *L);
+        LUA_FUNCTION int lua_on_click(lua_State *L);
 
-        inline void SetRefID(int ref_id) {this->ref_id = ref_id;}
-        inline int GetRefID(){return this->ref_id;}
-        inline int GetClickRefID(){return this->click_ref_id;}
+        int get_click_event_ref_id() { return click_event_ref_id; }
+
     private:
-        int ref_id;
-        int click_ref_id;
-    //     lua_CFunction button_click_handler;
+        int click_event_ref_id;
 };
 }

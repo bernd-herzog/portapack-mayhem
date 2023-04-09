@@ -1,11 +1,10 @@
 
 #include "lua_binding/lua_state.hpp"
 #include "button.hpp"
-#include "lua_binding/lua_binding.hpp"
 
 namespace lua_ui {
 
-/* static */ void Button::initialize_luabinding(lua_State *L, ui::LuaView *luaView) {
+/* static */ void Button::initialize_lua_binding(lua_State *L, ui::LuaView *luaView) {
 	typedef lua::LuaBinding<lua_ui::Button> ButtonBinding;
 
     ButtonBinding::Init("Button", [luaView](lua_ui::Button * s) {
@@ -13,23 +12,30 @@ namespace lua_ui {
         luaView->add_children({s});
     });
 
-    ButtonBinding::registerFunc<&lua_ui::Button::lua_SetText>("SetText");
-    ButtonBinding::registerFunc<&lua_ui::Button::lua_SetRect>("SetRect");
-    ButtonBinding::registerFunc<&lua_ui::Button::lua_OnClick>("OnClick");
+    ButtonBinding::registerFunc<&lua_ui::Button::lua_set_text>("SetText");
+    ButtonBinding::registerFunc<&lua_ui::Button::lua_set_rect>("SetRect");
+    ButtonBinding::registerFunc<&lua_ui::Button::lua_on_click>("OnClick");
     ButtonBinding::CreateLuaMetaClass(L, "CreateButton");
 }
 
-Button::Button() /* :button_click_handler(0)*/ {
+Button::Button() : click_event_ref_id(0) {
+    this->on_select = [](ui::Button& button) {
+        lua_ui::Button *b = (lua_ui::Button *)(&button);
+        int click_ref_id = b->get_click_event_ref_id();
+
+        if (click_ref_id != 0)
+            lua::lua_state.execute_lua_function(click_ref_id);
+    };
 }
 
-int Button::lua_SetText(lua_State *L) {
+LUA_FUNCTION int Button::lua_set_text(lua_State *L) {
     auto text = luaL_checkstring(L, 2);
     this->set_text(text);
 
     return 0;
 }
 
-int Button::lua_SetRect(lua_State *L) {
+LUA_FUNCTION int Button::lua_set_rect(lua_State *L) {
     auto x = luaL_checkint(L, 2);
     auto y = luaL_checkint(L, 3);
     auto w = luaL_checkint(L, 4);
@@ -40,7 +46,7 @@ int Button::lua_SetRect(lua_State *L) {
     return 0;
 }
 
-int Button::lua_OnClick(lua_State *L) {
+LUA_FUNCTION int Button::lua_on_click(lua_State *L) {
     bool isFunction = lua_isfunction(L, 2);
 
     if (isFunction == false) {
@@ -48,33 +54,10 @@ int Button::lua_OnClick(lua_State *L) {
         lua_error(L);
     }
 
-    // store somewhere
-   	this->click_ref_id = luaL_ref(L, LUA_REGISTRYINDEX);
-    
-    //lua_setfield(L, 1, "on_click");
+   	this->click_event_ref_id = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    // this->button_click_handler = lua_tocfunction(L, 2);
-    // if (!this->button_click_handler) {
-    //     chDbgPanic("no func");
-    // }
-
-    this->on_select = [](ui::Button& button) {
-        lua_ui::Button *b = (lua_ui::Button *)(&button);
-        
-        lua::lua_state.execute_lua_function(b->GetClickRefID());
-
-
-
-        // if (b->button_click_handler) {
-        //     chDbgPanic("on_select");
-            
-        // }
-    };
-
-    //auto clickHandler = luaL_checkint(L, 2);
 
     return 0;
 }
-
 
 }

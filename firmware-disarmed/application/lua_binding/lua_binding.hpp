@@ -81,10 +81,10 @@ template<class nestedClassType>
 	lua_setmetatable(L, -2);
 
 	lua_pushvalue(L, -1);
-    // TODO: impelment for events on click...
-	int refId = luaL_ref(L, LUA_REGISTRYINDEX);
-	(void)refId;
-	button->SetRefID(refId); // add dictionary refID to object
+    // // TODO: impelment for events on click...
+	// int refId = luaL_ref(L, LUA_REGISTRYINDEX);
+	// (void)refId;
+	// //button->SetRefID(refId); // add dictionary refID to object
 
 	callback(button);
 
