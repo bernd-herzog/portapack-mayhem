@@ -5,7 +5,13 @@
 #include "baseband_api.hpp"
 #include "core_control.hpp"
 #include "bitmap.hpp"
+#include "png_writer.hpp"
 #include "ui_flash_utility.hpp"
+
+extern uint32_t __process_stack_base__;
+extern uint32_t __process_stack_end__;
+#define CRT0_STACKS_FILL_PATTERN    0x55555555
+
 
 namespace lua_hw {
 
@@ -16,10 +22,14 @@ namespace lua_hw {
         created_firmware->run_flash_utility = [&nav](){nav.push<ui::FlashUtilityView>();};
     });
 
-    FirmwareBinding::regiser_object_creation_function(L, "CreateFirmware");
+    FirmwareBinding::regiser_object_creation_function(L, "GetFirmware");
     FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_run_sd_over_usb>("RunSDOverUSB");
     FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_run_flash_utility>("RunFlashUtility");
     FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_run_hack_rf_mode>("RunHackRfMode");
+    FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_get_free_heap>("GetFreeHeap");
+    FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_get_free_stack>("GetFreeStack");
+    FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_take_screenshot>("TakeScreenshor");
+    FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_run_app>("RunApp");
 }
 
 Firmware::Firmware() {
@@ -69,6 +79,63 @@ LUA_FUNCTION int Firmware::lua_run_hack_rf_mode(lua_State *L) {
     portapack::shutdown(true);
 	m4_init(portapack::spi_flash::image_tag_hackrf, portapack::memory::map::m4_code_hackrf, true);
 	m0_halt();
+    
+    return 0;
+}
+
+LUA_FUNCTION int Firmware::lua_get_free_heap(lua_State *L) {
+    lua_pop(L, 1);
+
+    const auto m0_core_free = chCoreStatus();
+
+	size_t m0_fragmented_free_space = 0;
+	chHeapStatus(NULL, &m0_fragmented_free_space);
+
+    lua_pushnumber(L, (double) (m0_core_free + m0_fragmented_free_space));
+    //lua_pushinteger(L, m0_fragmented_free_space);
+
+    return 1;
+}
+
+LUA_FUNCTION int Firmware::lua_get_free_stack(lua_State *L) {
+    (void)L;
+        
+    uint32_t *p;
+    for (p = &__process_stack_base__; *p == CRT0_STACKS_FILL_PATTERN && p < &__process_stack_end__; p++);
+    auto stack_space_left = p - &__process_stack_base__;
+
+    //return stack_space_left;
+
+    lua_pushinteger(L, stack_space_left);
+
+    return 1;
+}
+
+LUA_FUNCTION int Firmware::lua_take_screenshot(lua_State *L) {
+    (void)L;
+
+	auto path = next_filename_stem_matching_pattern(u"SCR_????");
+	if( path.empty() ) {
+		return 0;
+	}
+
+	PNGWriter png;
+	auto create_error = png.create(path.replace_extension(u".PNG"));
+	if( create_error.is_valid() ) {
+		return 0;
+	}
+
+	for(int i = 0; i < 320; i++) {
+		std::array<ui::ColorRGB888, 240> row;
+		portapack::display.read_pixels({ 0, i, 240, 1 }, row);
+		png.write_scanline(row);
+	}
+
+    return 0;
+}
+
+LUA_FUNCTION int Firmware::lua_run_app(lua_State *L) {
+    (void)L;
     
     return 0;
 }
