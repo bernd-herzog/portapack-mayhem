@@ -36,6 +36,8 @@
 #include "clock_manager.hpp"
 #include "temperature_logger.hpp"
 
+#define NOT_ON_STACK static
+
 namespace portapack {
 
 extern portapack::IO io;

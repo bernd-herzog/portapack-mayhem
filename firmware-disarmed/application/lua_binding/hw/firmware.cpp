@@ -28,7 +28,7 @@ namespace lua_hw {
     FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_run_hack_rf_mode>("RunHackRfMode");
     FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_get_free_heap>("GetFreeHeap");
     FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_get_free_stack>("GetFreeStack");
-    FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_take_screenshot>("TakeScreenshor");
+    FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_take_screenshot>("TakeScreenshot");
     FirmwareBinding::register_lua_function<&lua_hw::Firmware::lua_run_app>("RunApp");
 }
 

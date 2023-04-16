@@ -22,11 +22,12 @@ MakeWrapper(LuaErrorWrapper, (lua_State *L), (L), LuaState, int);
 
 LuaState::LuaState() :
     on_lua_error([](std::string, int){}),
-    luaState(luaL_newstate()),
+    luaState(nullptr),
     luaError("") {
 }
 
 void LuaState::init() {
+    luaState = luaL_newstate();
 	luaL_openlibs(get_state());
  	lua_atpanic(get_state(), GetWrapper(LuaErrorWrapper, &LuaState::lua_at_panic));
 }

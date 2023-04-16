@@ -149,17 +149,18 @@ Continuous (Fox-oring)
 rffc507x::RFFC507x first_if;
 
 static void event_loop() {
-	ui::Context context;
-	ui::LuaSystemView lua_view {
+	NOT_ON_STACK ui::Context context;
+	NOT_ON_STACK ui::LuaSystemView lua_view {
 		context,
 		portapack::display.screen_rect()
 	};
 
-	EventDispatcher event_dispatcher { &lua_view, context };
-	MessageHandlerRegistration message_handler_display_sleep {
+	NOT_ON_STACK EventDispatcher event_dispatcher { &lua_view, context };
+	EventDispatcher *p_event_dispatcher = &event_dispatcher;
+	NOT_ON_STACK MessageHandlerRegistration message_handler_display_sleep {
 		Message::ID::DisplaySleep,
-		[&event_dispatcher](const Message* const) {
-			event_dispatcher.set_display_sleep(true);
+		[&p_event_dispatcher](const Message* const) {
+			p_event_dispatcher->set_display_sleep(true);
 		}
 	};
 
@@ -174,7 +175,7 @@ int main(void) {
 
 		lcd_frame_sync_configure();
 		rtc_interrupt_enable();
-		lua::lua_state.init();
+		//lua::lua_state.init();
 
 		event_loop();
 

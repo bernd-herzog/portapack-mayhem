@@ -113,7 +113,8 @@ EventDispatcher::EventDispatcher(
 
 void EventDispatcher::run() {
 	while(is_running) {
-		const auto events = wait();
+		NOT_ON_STACK eventmask_t events;
+		events = wait();
 		dispatch(events);
 	}
 }
@@ -260,7 +261,7 @@ void EventDispatcher::on_touch_event(ui::TouchEvent event) {
 }
 
 void EventDispatcher::handle_lcd_frame_sync() {
-	DisplayFrameSyncMessage message;
+	NOT_ON_STACK DisplayFrameSyncMessage message;
 	message_map.send(&message);
 	painter.paint_widget_tree(top_widget);
 

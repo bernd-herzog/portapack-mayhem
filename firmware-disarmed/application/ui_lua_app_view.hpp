@@ -16,7 +16,7 @@ public:
 	void focus() override;
 	void paint(Painter& painter) override;
 
-	void LuaInit(lua_State *L);
+	void LuaInit();
 	void ActivateSDMode();
 
 private:

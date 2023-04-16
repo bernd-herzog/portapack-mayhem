@@ -23,6 +23,10 @@
 /* macro to `unsign' a character */
 #define uchar(c)        ((unsigned char)(c))
 
+// TODO: fix rotables
+#undef LUA_OPTIMIZE_MEMORY
+#define LUA_OPTIMIZE_MEMORY 0
+
 
 
 static int str_len (lua_State *L) {
@@ -855,7 +859,6 @@ const LUA_REG_TYPE strlib[] = {
 #endif
   {LNILKEY, LNILVAL}
 };
-
 
 #if LUA_OPTIMIZE_MEMORY != 2
 static void createmetatable (lua_State *L) {

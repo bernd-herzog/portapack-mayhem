@@ -33,17 +33,20 @@ void LuaAppView::paint(Painter& painter) {
     if (lua_initialized == false) {
         lua_initialized = true;
         //this->remove_children(children());
-        this->LuaInit(lua::lua_state.get_state());
+        this->LuaInit();
         this->set_dirty();
     }
 
     ui::View::paint(painter);
 }
 
-void LuaAppView::LuaInit(lua_State *L) {
-    lua_ui::Button::initialize_lua_binding(L, this);
-    lua_ui::Label::initialize_lua_binding(L, this);
-    lua_hw::Firmware::initialize_lua_binding(L, this->nav_);
+void LuaAppView::LuaInit() {
+    lua::lua_state.init();
+    auto lua_state = lua::lua_state.get_state();
+    
+    lua_ui::Button::initialize_lua_binding(lua_state, this);
+    lua_ui::Label::initialize_lua_binding(lua_state, this);
+    lua_hw::Firmware::initialize_lua_binding(lua_state, this->nav_);
 
     lua::lua_state.on_lua_error = [this](std::string luaError, int line) {
         constexpr int line_chars = 28;

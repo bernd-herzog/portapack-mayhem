@@ -30,13 +30,15 @@
   {LUA_MATHLIBNAME,	luaopen_math },\
   {LUA_DBLIBNAME,	luaopen_debug }
 
-  // {LUA_IOLIBNAME,	luaopen_io },\
+  // {LUA_IOLIBNAME,	luaopen_io },
 
-// #define LUA_PLATFORM_LIBS_ROM \
-//   _ROM( AUXLIB_RPC, luaopen_rpc, rpc_map )\
-//   _ROM( AUXLIB_BITARRAY, luaopen_bitarray, bitarray_map )\
-//   _ROM( AUXLIB_PACK, luaopen_pack, pack_map )\
-//   _ROM( AUXLIB_BIT, luaopen_bit, bit_map )
+#define LUA_PLATFORM_LIBS_ROM \
+  _ROM( LUA_MATHLIBNAME, luaopen_math, math_map )
+  
+  // _ROM( AUXLIB_RPC, luaopen_rpc, rpc_map )\
+  // _ROM( AUXLIB_BITARRAY, luaopen_bitarray, bitarray_map )\
+  // _ROM( AUXLIB_PACK, luaopen_pack, pack_map )\
+  // _ROM( AUXLIB_BIT, luaopen_bit, bit_map )
 
 
 #ifdef EXTRA_LIBS_INCLUDE
