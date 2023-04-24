@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2015 Jared Boone, ShareBrained Technology, Inc.
  * Copyright (C) 2020 euquiq
+ * Copyright (C) 2023 gullradriel, Nilorea Studio Inc.
  *
  * This file is part of PortaPack.
  *
@@ -26,7 +27,6 @@ using namespace portapack;
 
 namespace ui
 {
-
     void GlassView::focus()
     {
         field_marker.focus();
@@ -39,6 +39,19 @@ namespace ui
         baseband::shutdown();
     }
 
+    void GlassView::adjust_range(int64_t* f_min, int64_t* f_max, int64_t width) {
+        int64_t span = *f_max - *f_min;
+        int64_t num_intervals = span / width;
+        if( span % width != 0 )
+        {
+            num_intervals++;
+        }
+        int64_t new_span = num_intervals * width;
+        int64_t delta_span = (new_span - span) / 2;
+        *f_min -= delta_span;
+        *f_max += delta_span;
+    }
+
     void GlassView::on_lna_changed(int32_t v_db)
     {
         receiver_model.set_lna(v_db);
@@ -49,40 +62,71 @@ namespace ui
         receiver_model.set_vga(v_db);
     }
 
-    void GlassView::add_spectrum_pixel(int16_t color)
+    void GlassView::reset_live_view( bool clear_screen )
     {
-        spectrum_row[pixel_index] = spectrum_rgb3_lut[color] ;
-        spectrum_data[pixel_index] = ( live_frequency_integrate * spectrum_data[pixel_index] + color ) / (live_frequency_integrate + 1); // smoothing 
+        max_freq_hold = 0 ;
+        max_freq_power = -1000 ;
+        if( clear_screen )
+        {
+            // only clear screen in peak mode
+            if( live_frequency_view == 2 )
+            {
+                display.fill_rectangle( { { 0 , 108 + 16 } , { 240 , 320 - (108 + 16) } } , { 0 , 0 , 0 } );
+            }
+        }
+    }
+
+    void GlassView::add_spectrum_pixel( uint8_t power )
+    {
+        static int64_t last_max_freq = 0 ;
+
+        spectrum_row[pixel_index] = spectrum_rgb3_lut[power] ; // row of colors
+        spectrum_data[pixel_index] = ( live_frequency_integrate * spectrum_data[pixel_index] + power ) / (live_frequency_integrate + 1); // smoothing 
         pixel_index ++ ;
 
         if (pixel_index == 240) // got an entire waterfall line
         {
-			if( live_frequency_view )
-			{
-				constexpr int rssi_sample_range = 256;
-				//constexpr float rssi_voltage_min = 0.4;
-			    constexpr float rssi_voltage_max = 2.2;
-		        constexpr float adc_voltage_max = 3.3;
-				//constexpr int raw_min = rssi_sample_range * rssi_voltage_min / adc_voltage_max;
-				constexpr int raw_min = 0 ;
-				constexpr int raw_max = rssi_sample_range * rssi_voltage_max / adc_voltage_max;
-			    constexpr int raw_delta = raw_max - raw_min;
-				const range_t<int> y_max_range { 0 , 320 - 108 };
+            if( live_frequency_view > 0 )
+            {
+                constexpr int rssi_sample_range = 256;
+                constexpr float rssi_voltage_min = 0.4;
+                constexpr float rssi_voltage_max = 2.2;
+                constexpr float adc_voltage_max = 3.3;
+                constexpr int raw_min = rssi_sample_range * rssi_voltage_min / adc_voltage_max;
+                constexpr int raw_max = rssi_sample_range * rssi_voltage_max / adc_voltage_max;
+                constexpr int raw_delta = raw_max - raw_min;
+                const range_t<int> y_max_range { 0 , 320 - ( 108 + 16 ) };
 
-				//drawing
-				//display.fill_rectangle( { { 0 , 108 } , { 240 , 320 - 108 } } , { 0 , 0 , 0 } );
-				for( uint16_t xpos = 0 ; xpos < 240 ; xpos ++ )
-				{
-					int16_t point = y_max_range.clip( ( ( spectrum_data[ xpos ] - raw_min ) * ( 320 - 108 ) ) / raw_delta );
-					uint8_t color_gradient = (point * 255) / 212 ;
-					display.fill_rectangle( { { xpos , 108 } , { 1 , 320 - point } } , { 0 , 0 , 0 } );
-					display.fill_rectangle( { { xpos , 320 - point } , { 1 , point } } , { color_gradient , 0 , uint8_t( 255 - color_gradient ) } );
-				} 
-			}
-			else
-			{
-				display.draw_pixels({{0, display.scroll(1)}, {240, 1}}, spectrum_row); // new line at top, one less var, speedier
-			}
+                //drawing and keeping track of max freq
+                for( uint16_t xpos = 0 ; xpos < 240 ; xpos ++ )
+                {
+                    // save max powerwull freq 
+                    if( spectrum_data[ xpos ] > max_freq_power )
+                    {
+                        max_freq_power = spectrum_data[ xpos ];
+                        max_freq_hold = f_min + ( (f_max - f_min) * xpos) / 240 ;
+                    }
+
+                    int16_t point = y_max_range.clip( ( ( spectrum_data[ xpos ] - raw_min ) * ( 320 - ( 108 + 16 ) ) ) / raw_delta );
+                    uint8_t color_gradient = (point * 255) / 212 ;
+                    // clear if not in peak view
+                    if( live_frequency_view != 2 )
+                    {
+                        display.fill_rectangle( { { xpos , 108 + 16 } , { 1 , 320 - point } } , { 0 , 0 , 0 } );
+                    }
+                    display.fill_rectangle( { { xpos , 320 - point } , { 1 , point } } , { color_gradient , 0 , uint8_t( 255 - color_gradient ) } );
+                } 
+                if( last_max_freq != max_freq_hold )
+                {
+                    last_max_freq = max_freq_hold ;
+                    freq_stats.set( "MAX HOLD: "+to_string_short_freq( max_freq_hold ) );
+                }
+                PlotMarker(field_marker.value());
+            }
+            else
+            {
+                display.draw_pixels({{0, display.scroll(1)}, {240, 1}}, spectrum_row); // new line at top, one less var, speedier
+            }
             pixel_index = 0;                                                       // Start New cascade line
         }
     }
@@ -92,51 +136,84 @@ namespace ui
     void GlassView::on_channel_spectrum(const ChannelSpectrum &spectrum)
     {
         baseband::spectrum_streaming_stop();
-
-        // Convert bins of this spectrum slice into a representative max_power and when enough, into pixels
-        // Spectrum.db has 256 bins. Center 12 bins are ignored (DC spike is blanked) Leftmost and rightmost 2 bins are ignored
-        // All things said and done, we actually need 240 of those bins:
-        for (uint8_t bin = 0; bin < 240; bin++)
+        if( fast_scan )
         {
-            if (bin < 120)
+            // Convert bins of this spectrum slice into a representative max_power and when enough, into pixels
+            // Spectrum.db has 256 bins. Center 12 bins are ignored (DC spike is blanked) Leftmost and rightmost 2 bins are ignored
+            // All things said and done, we actually need 240 of those bins:
+            for (uint8_t bin = 0; bin < 240; bin++)
+            {
+                if (bin < 120)
+                {
+                    if (spectrum.db[134 + bin] > max_power) // 134
+                        max_power = spectrum.db[134 + bin];
+                }
+                else
+                {
+                    if (spectrum.db[bin - 118] > max_power) // 118
+                        max_power = spectrum.db[bin - 118];
+                }
+
+                bins_Hz_size += each_bin_size; // add this bin Hz count into the "pixel fulfilled bag of Hz"
+
+                if (bins_Hz_size >= marker_pixel_step) // new pixel fullfilled
+                {
+                    if (min_color_power < max_power)
+                        add_spectrum_pixel(max_power); // Pixel will represent max_power
+                    else
+                        add_spectrum_pixel(0); // Filtered out, show black
+
+                    max_power = 0;
+
+                    if (!pixel_index) // Received indication that a waterfall line has been completed
+                    {
+                        bins_Hz_size = 0;                      // Since this is an entire pixel line, we don't carry "Pixels into next bin"
+                        f_center = f_center_ini;               // Start a new sweep
+                        radio::set_tuning_frequency(f_center); // tune rx for this new slice directly, faster than using persistent memory saving
+                        chThdSleepMilliseconds(10);
+                        baseband::spectrum_streaming_start(); // Do the RX
+                        return;
+                    }
+                    bins_Hz_size -= marker_pixel_step; // reset bins size, but carrying the eventual excess Hz into next pixel
+                }
+            }
+
+            f_center += LOOKING_GLASS_SLICE_WIDTH; // Move into the next bandwidth slice NOTE: spectrum.sampling_rate = LOOKING_GLASS_SLICE_WIDTH
+        }
+        else //slow scan
+        { 
+            for( int16_t bin = 0 ; bin < 120 ; bin++)
             {
                 if (spectrum.db[134 + bin] > max_power) // 134
-                    max_power = spectrum.db[134 + bin];
-            }
-            else
-            {
-                if (spectrum.db[bin - 118] > max_power) // 118
-                    max_power = spectrum.db[bin - 118];
-            }
+                        max_power = spectrum.db[134 + bin];
 
-            bins_Hz_size += each_bin_size; // add this bin Hz count into the "pixel fulfilled bag of Hz"
+                bins_Hz_size += each_bin_size; // add this bin Hz count into the "pixel fulfilled bag of Hz"
 
-            if (bins_Hz_size >= marker_pixel_step) // new pixel fullfilled
-            {
-                if (min_color_power < max_power)
-                    add_spectrum_pixel(max_power); // Pixel will represent max_power
-                else
-                    add_spectrum_pixel(0); // Filtered out, show black
-
-                max_power = 0;
-
-                if (!pixel_index) // Received indication that a waterfall line has been completed
+                if (bins_Hz_size >= marker_pixel_step) // new pixel fullfilled
                 {
-                    bins_Hz_size = 0;                      // Since this is an entire pixel line, we don't carry "Pixels into next bin"
-                    f_center = f_center_ini;               // Start a new sweep
-                    radio::set_tuning_frequency(f_center); // tune rx for this new slice directly, faster than using persistent memory saving
-                    chThdSleepMilliseconds(10);
-                    baseband::spectrum_streaming_start(); // Do the RX
-                    return;
-                }
-                bins_Hz_size -= marker_pixel_step; // reset bins size, but carrying the eventual excess Hz into next pixel
-            }
-        }
+                    if (min_color_power < max_power)
+                        add_spectrum_pixel(max_power); // Pixel will represent max_power
+                    else
+                        add_spectrum_pixel(0); // Filtered out, show black
 
-        f_center += LOOKING_GLASS_SLICE_WIDTH; // Move into the next bandwidth slice NOTE: spectrum.sampling_rate = LOOKING_GLASS_SLICE_WIDTH
+                    max_power = 0;
+
+                    if (!pixel_index) // Received indication that a waterfall line has been completed
+                    {
+                        bins_Hz_size = 0;                      // Since this is an entire pixel line, we don't carry "Pixels into next bin"
+                        f_center = f_center_ini;               // Start a new sweep
+                        radio::set_tuning_frequency(f_center); // tune rx for this new slice directly, faster than using persistent memory saving
+                        chThdSleepMilliseconds(10);
+                        baseband::spectrum_streaming_start(); // Do the RX
+                        return;
+                    }
+                    bins_Hz_size -= marker_pixel_step; // reset bins size, but carrying the eventual excess Hz into next pixel
+                }
+            }
+            f_center += LOOKING_GLASS_SLICE_WIDTH / 2 ;
+        }
         radio::set_tuning_frequency(f_center); // tune rx for this new slice directly, faster than using persistent memory saving
         chThdSleepMilliseconds(5);
-
         // receiver_model.set_tuning_frequency(f_center); //tune rx for this slice
         baseband::spectrum_streaming_start(); // Do the RX
     }
@@ -155,19 +232,27 @@ namespace ui
 
     void GlassView::on_range_changed()
     {
+        reset_live_view( false );
         f_min = field_frequency_min.value();
         f_max = field_frequency_max.value();
         search_span = f_max - f_min;
 
         field_marker.set_range(f_min, f_max);              // Move the marker between range
         field_marker.set_value(f_min + (search_span / 2)); // Put MARKER AT MIDDLE RANGE
-        text_range.set(to_string_dec_uint(search_span));
+        if( locked_range )
+        {
+            button_range.set_text(">"+to_string_dec_uint(search_span)+"<");
+        }
+        else
+        {
+            button_range.set_text(" "+to_string_dec_uint(search_span)+" ");
+        }
 
         f_min = (f_min)*MHZ_DIV; // Transpose into full frequency realm
         f_max = (f_max)*MHZ_DIV;
-        search_span = search_span * MHZ_DIV;
+        adjust_range( &f_min , &f_max , 240 );
 
-        marker_pixel_step = search_span / 240;                                        // Each pixel value in Hz
+        marker_pixel_step = (f_max - f_min) / 240;                                        // Each pixel value in Hz
         text_marker_pm.set(to_string_dec_uint((marker_pixel_step / X2_MHZ_DIV) + 1)); // Give idea of +/- marker precision
 
         int32_t marker_step = marker_pixel_step / MHZ_DIV;
@@ -194,11 +279,16 @@ namespace ui
         pos = pos * MHZ_DIV;
         pos -= f_min;
         pos = pos / marker_pixel_step; // Real pixel
-
-        portapack::display.fill_rectangle({0, 100, 240, 8}, Color::black());        // Clear old marker and whole marker rectangle btw
-        portapack::display.fill_rectangle({(int)pos - 2, 100, 5, 3}, Color::red()); // Red marker top
-        portapack::display.fill_rectangle({(int)pos - 1, 103, 3, 3}, Color::red()); // Red marker middle
-        portapack::display.fill_rectangle({(int)pos, 106, 1, 2}, Color::red());     // Red marker bottom
+        
+        uint8_t shift_y = 0 ;
+        if( live_frequency_view > 0 )
+        {
+            shift_y = 16 ;
+        }
+        portapack::display.fill_rectangle({0, 100 + shift_y, 240, 8}, Color::black());        // Clear old marker and whole marker rectangle btw
+        portapack::display.fill_rectangle({(int)pos - 2, 100 + shift_y, 5, 3}, Color::red()); // Red marker top
+        portapack::display.fill_rectangle({(int)pos - 1, 103 + shift_y, 3, 3}, Color::red()); // Red marker middle
+        portapack::display.fill_rectangle({(int)pos, 106 + shift_y, 1, 2}, Color::red());     // Red marker bottom
     }
 
     GlassView::GlassView(
@@ -211,8 +301,9 @@ namespace ui
                       &field_frequency_max,
                       &field_lna,
                       &field_vga,
-                      &text_range,
+                      &button_range,
                       &steps_config,
+                      &scan_type,
                       &view_config,
                       &level_integration,
                       &filter_config,
@@ -220,89 +311,107 @@ namespace ui
                       &range_presets,
                       &field_marker,
                       &text_marker_pm,
-                      &field_trigger});
+                      &field_trigger,
+                      &button_jump,
+                      &button_rst,
+                      &freq_stats});
 
         load_Presets(); // Load available presets from TXT files (or default)
 
-        field_frequency_min.set_value(presets_db[0].min); // Defaults to first preset
-        field_frequency_min.set_step( steps );
         field_frequency_min.on_change = [this](int32_t v)
         {
-            int32_t steps_ = steps ;
-            if( steps_ < 24 )
-                steps_ = 24 ;
-            if( v > 7200 - steps_ )
+            reset_live_view( true );
+            int32_t min_size = steps ;
+            if( locked_range )
+                min_size = search_span ;
+            if( min_size < 20 )
+                min_size = 20 ;
+            if( v > 7200 - min_size )
             {
-                v = 7200 - steps_ ;
+                v = 7200 - min_size ;
                 field_frequency_min.set_value( v ); 
             }
-            if (v >= (field_frequency_max.value() - steps_ ) )
-                field_frequency_max.set_value( v + steps_ );
+            if (v > (field_frequency_max.value() - min_size ) )
+                field_frequency_max.set_value( v + min_size );
+            if( locked_range )
+                field_frequency_max.set_value( v + min_size );
             this->on_range_changed();
         };
+        field_frequency_min.set_value(presets_db[0].min); // Defaults to first preset
+        field_frequency_min.set_step( steps );
 
         field_frequency_min.on_select = [this, &nav](NumberField& field) {
             auto new_view = nav_.push<FrequencyKeypadView>(field_frequency_min.value()*1000000);
             new_view->on_changed = [this, &field](rf::Frequency f) {
                 int32_t freq = f / 1000000 ;
-                int32_t steps_ = steps ;
-                if( steps_ < 24 )
-                    steps_ = 24 ;
-                if( freq > (7200 - steps_ ) )
-                    freq= 7200 - steps_  ;
+                int32_t min_size = steps ;
+                if( locked_range )
+                    min_size = search_span ;
+                if( min_size < 20 )
+                    min_size = 20 ;
+                if( freq > (7200 - min_size ) )
+                    freq = 7200 - min_size  ;
                 field_frequency_min.set_value( freq );
-                if( field_frequency_max.value() < ( freq + steps_ ) )
-                    field_frequency_max.set_value( freq + steps_ );
+                if( field_frequency_max.value() < ( freq + min_size ) )
+                    field_frequency_max.set_value( freq + min_size );
                 this->on_range_changed();
             };
         };
 
-        field_frequency_max.set_value(presets_db[0].max); // Defaults to first preset
-        field_frequency_max.set_step( steps );
         field_frequency_max.on_change = [this](int32_t v)
         {          
-            int32_t steps_ = steps ;
-            if( steps_ < 24 )
-                steps_ = 24 ;
-            if( v < steps_ )
+            reset_live_view( true );
+            int32_t min_size = steps ;
+            if( locked_range )
+                min_size = search_span ;
+            if( min_size < 20 )
+                min_size = 20 ;
+            if( v < min_size )
             {
-                v = steps_ ;
+                v = min_size ;
                 field_frequency_max.set_value( v ); 
             }
-            if (v < (field_frequency_min.value() + steps_) )
-                field_frequency_min.set_value(v - steps_);
+            if (v < (field_frequency_min.value() + min_size) )
+                field_frequency_min.set_value(v - min_size);
+            if( locked_range )
+                field_frequency_min.set_value( v - min_size );
             this->on_range_changed();
         };
+        field_frequency_max.set_value(presets_db[0].max); // Defaults to first preset
+        field_frequency_max.set_step( steps );
 
         field_frequency_max.on_select = [this, &nav](NumberField& field) {
             auto new_view = nav_.push<FrequencyKeypadView>(field_frequency_max.value()*1000000);
             new_view->on_changed = [this, &field](rf::Frequency f) {
-                int32_t steps_ = steps ;
-                if( steps_ < 24 )
-                    steps_ = 24 ;
+                int32_t min_size = steps ;
+                if( locked_range )
+                    min_size = search_span ;
+                if( min_size < 20 )
+                    min_size = 20 ;
                 int32_t freq = f / 1000000 ;
-                if( freq < 24 )
-                    freq = 24 ;
+                if( freq < min_size )
+                    freq = min_size ;
                 field_frequency_max.set_value( freq );
-                if( field_frequency_min.value() > ( freq - steps) ) 
-                    field_frequency_min.set_value( freq - steps );
+                if( field_frequency_min.value() > ( freq - min_size) ) 
+                    field_frequency_min.set_value( freq - min_size );
                 this->on_range_changed();
             };
         };
 
-        field_lna.set_value(receiver_model.lna());
         field_lna.on_change = [this](int32_t v)
         {
+            reset_live_view( true );
             this->on_lna_changed(v);
         };
+        field_lna.set_value(receiver_model.lna());
 
-        field_vga.set_value(receiver_model.vga());
         field_vga.on_change = [this](int32_t v_db)
         {
+            reset_live_view( true );
             this->on_vga_changed(v_db);
         };
+        field_vga.set_value(receiver_model.vga());
 
-        steps_config.set_selected_index(3); //default of 250 Mhz steps
         steps_config.on_change = [this](size_t n, OptionsField::value_t v)
         {
             (void)n;
@@ -310,39 +419,67 @@ namespace ui
             field_frequency_max.set_step( v );
             steps = v ;
         };
+        steps_config.set_selected_index(0); //default of 1 Mhz steps
+                                            
+        scan_type.on_change = [this](size_t n, OptionsField::value_t v)
+        {
+            (void)n;
+            fast_scan = v ;
+        };
+        scan_type.set_selected_index(0); // default legacy fast scan
 
         view_config.on_change = [this](size_t n, OptionsField::value_t v)
         {
-			(void)n;
-			live_frequency_view = v ;
-			if( v )
-			{	
-				display.scroll_disable();
-				level_integration.hidden( false );
-			}
-			else
-			{
-				level_integration.hidden( true );
-				set_dirty();
-				display.scroll_set_area(109, 319); // Restart scroll on the correct coordinates
-			}
-			// clear between changes
-			display.fill_rectangle( { { 0 , 108 } , { 240 , 320 - 108 } } , { 0 , 0 , 0 } );
+            (void)n;
+            // clear between changes
+            reset_live_view( true );
+            if( v == 0 )
+            {
+                live_frequency_view = 0 ;
+                level_integration.hidden( true );
+                freq_stats.hidden( true );
+                button_jump.hidden( true );
+                button_rst.hidden( true );
+                display.scroll_set_area(109, 319); // Restart scroll on the correct coordinates
+            }
+            else if( v == 1 )
+            {
+                display.fill_rectangle( { { 0 , 108 } , { 240 , 24 } } , { 0 , 0 , 0 } );
+                live_frequency_view = 1 ;
+                display.scroll_disable();
+                level_integration.hidden( false );
+                freq_stats.hidden( false );
+                button_jump.hidden( false );
+                button_rst.hidden( false );
+            }
+            else if( v == 2 )
+            {
+                display.fill_rectangle( { { 0 , 108 } , { 240 , 24 } } , { 0 , 0 , 0 } );
+                live_frequency_view = 2 ;
+                display.scroll_disable();
+                level_integration.hidden( false );
+                freq_stats.hidden( false );
+                button_jump.hidden( false );
+                button_rst.hidden( false );
+            }
+            set_dirty();
         };
         view_config.set_selected_index(0); //default spectrum
 
         level_integration.on_change = [this](size_t n, OptionsField::value_t v)
         {
-			(void)n;
-			live_frequency_integrate = v ;
+            (void)n;
+            reset_live_view( true );
+            live_frequency_integrate = v ;
         };
-        level_integration.set_selected_index(2); //default integration of ( 3 * old value + new_value ) / 4
+        level_integration.set_selected_index(3); //default integration of ( 3 * old value + new_value ) / 4
 
-	filter_config.set_selected_index(0);
         filter_config.on_change = [this](size_t n, OptionsField::value_t v) {
             (void)n;
+            reset_live_view( true );
             min_color_power = v;
         };
+        filter_config.set_selected_index(0);
 
         range_presets.on_change = [this](size_t n, OptionsField::value_t v)
         {
@@ -367,10 +504,36 @@ namespace ui
             nav_.push<AnalogAudioView>(); // Jump into audio view
         };
 
-        field_trigger.set_value(32); // Defaults to 32, as normal triggering resolution
         field_trigger.on_change = [this](int32_t v)
         {
             baseband::set_spectrum(LOOKING_GLASS_SLICE_WIDTH, v);
+        };
+        field_trigger.set_value(32); // Defaults to 32, as normal triggering resolution
+                                     
+        button_range.on_select = [this](Button&) {
+            if( locked_range )
+            {
+                locked_range = false ;
+                button_range.set_style(&style_white);
+                button_range.set_text(" "+to_string_dec_uint(search_span)+" ");
+            }
+            else
+            {
+                locked_range = true ;
+                button_range.set_style(&style_red);
+                button_range.set_text(">"+to_string_dec_uint(search_span)+"<");
+            }
+        };
+
+        button_jump.on_select = [this](Button&) {
+            receiver_model.set_tuning_frequency(max_freq_hold); // Center tune rx in marker freq.
+            receiver_model.set_frequency_step(MHZ_DIV);    // Preset a 1 MHz frequency step into RX -> AUDIO
+            nav_.pop();
+            nav_.push<AnalogAudioView>(); // Jump into audio view
+        };
+
+        button_rst.on_select = [this](Button&) {
+            reset_live_view( true );
         };
 
         display.scroll_set_area(109, 319);
