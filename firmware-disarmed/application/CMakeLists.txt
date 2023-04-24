@@ -191,6 +191,7 @@ set(CPPSRC
 	${COMMON}/ui_widget.cpp
 	${COMMON}/utility.cpp
 	${COMMON}/wm8731.cpp
+	${COMMON}/performance_counter.cpp
 	${FIRMWARE_APPLICATION}/app_settings.cpp
 	${FIRMWARE_APPLICATION}/audio.cpp
 	${FIRMWARE_APPLICATION}/baseband_api.cpp
@@ -271,6 +272,7 @@ set(CPPSRC
 	# ${FIRMWARE_APPLICATION}/apps/ui_encoders.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_fileman.cpp
 	${FIRMWARE_APPLICATION}/apps/ui_flash_utility.cpp
+	${FIRMWARE_APPLICATION}/apps/ui_dfu_menu.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_sd_over_usb.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_freqman.cpp
 	# ${FIRMWARE_APPLICATION}/apps/ui_jammer.cpp

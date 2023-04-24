@@ -16,7 +16,7 @@ static constexpr ui::Style style_default {
 LuaSystemView::LuaSystemView(
     Context& context,
     const Rect parent_rect
-) : View { parent_rect },
+) : OverlayView { parent_rect },
     context_(context)
 {
     set_style(&style_default);
@@ -44,6 +44,36 @@ LuaSystemView::LuaSystemView(
 
 Context& LuaSystemView::context() const {
     return context_;
+}
+
+void LuaSystemView::toggle_overlay() {
+	if (overlay_active){
+		this->remove_child(&this->overlay);
+		this->set_dirty();
+		shared_memory.request_m4_performance_counter = 0;
+	}
+	else{
+		this->add_child(&this->overlay);
+		this->set_dirty();
+		shared_memory.request_m4_performance_counter = 1;
+		shared_memory.m4_cpu_usage = 0;
+		shared_memory.m4_heap_usage = 0;
+		shared_memory.m4_stack_usage = 0;
+	}
+
+	overlay_active = !overlay_active;
+}
+
+void LuaSystemView::paint_overlay() {
+	static bool last_paint_state = false;
+	if (overlay_active){
+		// paint background only every other second
+		if ((((chTimeNow()>>10) & 0x01) == 0x01) == last_paint_state)
+			return;
+
+		last_paint_state = !last_paint_state;
+		this->overlay.set_dirty();
+	}
 }
 
 }

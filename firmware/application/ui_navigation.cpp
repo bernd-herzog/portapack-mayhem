@@ -667,7 +667,7 @@ static constexpr ui::Style style_default {
 SystemView::SystemView(
 	Context& context,
 	const Rect parent_rect
-) : View { parent_rect },
+) : OverlayView { parent_rect },
 	context_(context)
 {
 	set_style(&style_default);

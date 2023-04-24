@@ -283,7 +283,23 @@ namespace ui
 		void hackrf_mode(NavigationView &nav);
 	};
 
-	class SystemView : public View
+	class OverlayView : public View {
+	public:
+		OverlayView() {
+		}
+
+		OverlayView(Rect parent_rect) : View { parent_rect } {
+		}
+
+		virtual void toggle_overlay() = 0;
+		virtual void paint_overlay() = 0;
+
+		virtual ~OverlayView() = default;
+	protected:
+		bool overlay_active {false};
+	};
+
+	class SystemView : public OverlayView
 	{
 	public:
 		SystemView(
@@ -295,8 +311,6 @@ namespace ui
 		void paint_overlay();
 
 	private:
-		bool overlay_active {false};
-
 		SystemStatusView status_view{navigation_view};
 		InformationView info_view{navigation_view};
 		DfuMenu overlay{navigation_view};
