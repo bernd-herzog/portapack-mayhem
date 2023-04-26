@@ -24,6 +24,10 @@ LuaAppView::LuaAppView(NavigationView& nav) : nav_ (nav) {
     };
 }
 
+LuaAppView::LuaAppView(NavigationView& nav, const char *app_name) : nav_ (nav) {
+
+}
+
 void LuaAppView::focus() {
 	button_run.focus();
 }

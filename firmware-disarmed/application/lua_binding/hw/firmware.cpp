@@ -7,11 +7,11 @@
 #include "bitmap.hpp"
 #include "png_writer.hpp"
 #include "ui_flash_utility.hpp"
+#include "ui_lua_app_view.hpp"
 
 extern uint32_t __process_stack_base__;
 extern uint32_t __process_stack_end__;
-#define CRT0_STACKS_FILL_PATTERN    0x55555555
-
+#define CRT0_STACKS_FILL_PATTERN 0x55555555
 
 namespace lua_hw {
 
@@ -20,6 +20,7 @@ namespace lua_hw {
 
     FirmwareBinding::initialize_object_creation("Firmware", [&nav](lua_hw::Firmware *created_firmware) { 
         created_firmware->run_flash_utility = [&nav](){nav.push<ui::FlashUtilityView>();};
+        created_firmware->get_navigation_view = [&nav]()->ui::NavigationView&{return nav;};
     });
 
     FirmwareBinding::regiser_object_creation_function(L, "GetFirmware");
@@ -104,8 +105,6 @@ LUA_FUNCTION int Firmware::lua_get_free_stack(lua_State *L) {
     for (p = &__process_stack_base__; *p == CRT0_STACKS_FILL_PATTERN && p < &__process_stack_end__; p++);
     auto stack_space_left = p - &__process_stack_base__;
 
-    //return stack_space_left;
-
     lua_pushinteger(L, stack_space_left);
 
     return 1;
@@ -135,8 +134,14 @@ LUA_FUNCTION int Firmware::lua_take_screenshot(lua_State *L) {
 }
 
 LUA_FUNCTION int Firmware::lua_run_app(lua_State *L) {
-    (void)L;
+    char *app_name = const_cast<char *>(luaL_checkstring(L, 2));
     
+    //TODO: create new lua state for every app instance
+    //TODO: gc after events
+    auto& navigation_view = get_navigation_view();
+
+    navigation_view.push<ui::LuaAppView>(app_name);
+
     return 0;
 }
 

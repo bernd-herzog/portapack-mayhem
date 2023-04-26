@@ -12,6 +12,7 @@ namespace ui {
 class LuaAppView : public ui::View {
 public:
 	LuaAppView(NavigationView& nav);
+	LuaAppView(NavigationView& nav, const char *app_name);
 
 	void focus() override;
 	void paint(Painter& painter) override;
@@ -22,6 +23,7 @@ public:
 private:
     bool lua_initialized = false;
 	NavigationView& nav_;
+	const char *app_name;
 
 	Button button_run {
 		{ 2 * 8, 14 * 16, 26 * 8, 2 * 16 },

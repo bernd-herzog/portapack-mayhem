@@ -24,6 +24,7 @@ class Firmware {
         LUA_FUNCTION int lua_run_app(lua_State *L);
 
         std::function<void(void)> run_flash_utility = [](){};
+        std::function<ui::NavigationView&(void)> get_navigation_view = []()->ui::NavigationView&{};
 
     private:
 
