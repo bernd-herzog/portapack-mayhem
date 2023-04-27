@@ -1,15 +1,15 @@
 
 #include "lua_binding/lua_state.hpp"
 #include "label.hpp"
+#include "ui_lua_app_view.hpp"
 
 namespace lua_ui {
 
-/* static */ void Label::initialize_lua_binding(lua_State *L, ui::View *parent) {
+/* static */ void Label::initialize_lua_binding(lua_State *L, ui::LuaAppView *parent) {
 	typedef lua::LuaBinding<lua_ui::Label> LabelBinding;
 
     LabelBinding::initialize_object_creation("Label", [parent](lua_ui::Label *created_label) {
-        created_label->set_parent(parent);
-        parent->add_children({created_label});
+        parent->add_lua_child(created_label);
     });
 
     LabelBinding::regiser_object_creation_function(L, "CreateLabel");

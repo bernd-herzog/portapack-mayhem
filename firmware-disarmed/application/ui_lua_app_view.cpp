@@ -10,7 +10,10 @@
 
 namespace ui {
 
-LuaAppView::LuaAppView(NavigationView& nav) : nav_ (nav) {
+LuaAppView::LuaAppView(NavigationView& nav) :
+    nav_ (nav),
+    app_name (nullptr)
+{
 	add_children({
 		&button_run,
 		&button_sd
@@ -24,8 +27,27 @@ LuaAppView::LuaAppView(NavigationView& nav) : nav_ (nav) {
     };
 }
 
-LuaAppView::LuaAppView(NavigationView& nav, const char *app_name) : nav_ (nav) {
+LuaAppView::LuaAppView(NavigationView& nav, const char *app_name) :
+    nav_ (nav),
+    app_name (app_name)
+{
+	add_children({
+		&button_run,
+		&button_sd
+	});
 
+    button_run.on_select = [this](Button&) {
+    };
+
+    button_sd.on_select = [this](Button&) {
+        this->ActivateSDMode();
+    };
+}
+
+LuaAppView::~LuaAppView(){
+    for(auto child : this->lua_children) {
+		delete child;
+	}
 }
 
 void LuaAppView::focus() {
@@ -36,12 +58,17 @@ void LuaAppView::paint(Painter& painter) {
     /* delayed execute */
     if (lua_initialized == false) {
         lua_initialized = true;
-        //this->remove_children(children());
+
         this->LuaInit();
         this->set_dirty();
     }
 
     ui::View::paint(painter);
+}
+
+void LuaAppView::add_lua_child(ui::Widget * child){
+    this->add_children({child});
+    this->lua_children.push_back(child);
 }
 
 void LuaAppView::LuaInit() {
@@ -70,7 +97,21 @@ void LuaAppView::LuaInit() {
             });
     };
 
-    lua::lua_state.execute_lua_script(reinterpret_cast<const TCHAR*>(u"/APPS/main.lua"));
+    if (app_name) {
+        static TCHAR buf[255];
+        memset(buf, 255, sizeof(TCHAR));
+        for (int i = 0; i < 255; i++) {
+            buf[i] = app_name[i];
+            if (app_name[i] == 0)
+            break;
+        }
+
+        lua::lua_state.execute_lua_script(buf);
+    }
+    else {
+        lua::lua_state.execute_lua_script(reinterpret_cast<const TCHAR*>(u"/APPS/main.lua"));
+    }
+
 }
 
 void LuaAppView::ActivateSDMode() {

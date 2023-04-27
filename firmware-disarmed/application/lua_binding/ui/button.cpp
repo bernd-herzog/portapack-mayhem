@@ -1,15 +1,15 @@
 
 #include "lua_binding/lua_state.hpp"
 #include "button.hpp"
+#include "ui_lua_app_view.hpp"
 
 namespace lua_ui {
 
-/* static */ void Button::initialize_lua_binding(lua_State *L, ui::View *parent) {
+/* static */ void Button::initialize_lua_binding(lua_State *L, ui::LuaAppView *parent) {
 	typedef lua::LuaBinding<lua_ui::Button> ButtonBinding;
 
     ButtonBinding::initialize_object_creation("Button", [parent](lua_ui::Button *created_button) {
-        created_button->set_parent(parent);
-        parent->add_children({created_button});
+        parent->add_lua_child(created_button);
     });
 
     ButtonBinding::regiser_object_creation_function(L, "CreateButton");

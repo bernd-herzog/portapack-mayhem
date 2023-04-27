@@ -2,11 +2,12 @@
 
 #include "ui_lua_system_view.hpp"
 #include "lua_binding/lua_binding.hpp"
+#include "ui_lua_app_view.hpp"
 
 namespace lua_ui {
 class Button : public ui::Button {
     public:
-        static void initialize_lua_binding(lua_State *L, ui::View *parent);
+        static void initialize_lua_binding(lua_State *L, ui::LuaAppView *parent);
 
         Button();
 

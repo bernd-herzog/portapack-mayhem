@@ -140,6 +140,8 @@ LUA_FUNCTION int Firmware::lua_run_app(lua_State *L) {
     //TODO: gc after events
     auto& navigation_view = get_navigation_view();
 
+    //TODO: cant pop last item
+    navigation_view.pop();
     navigation_view.push<ui::LuaAppView>(app_name);
 
     return 0;

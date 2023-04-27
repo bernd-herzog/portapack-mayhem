@@ -25,7 +25,7 @@ function SetupUI()
     app.button6:SetRect(1*8, 11*16, 24*8, 2*16)
     app.button6:SetText("Start Radio")
     app.button6:OnClick(function ()
-        GetFirmware():RunApp("radio")
+        GetFirmware():RunApp("/APPS/radio/app.lua")
         mainApp = nil -- free resources
     end)
 

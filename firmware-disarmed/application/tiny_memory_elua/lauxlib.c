@@ -620,7 +620,8 @@ static int errfile (lua_State *L, const char *what, int fnameindex) {
 
 
 LUALIB_API int luaL_loadfile (lua_State *L, const char *filename) {
-  TCHAR buf[255];
+  // TODO: bad for stack! bad bad
+  static TCHAR buf[255];
   memset(buf, 255, sizeof(TCHAR));
   for (int i = 0; i < 255; i++) {
     buf[i] = filename[i];
