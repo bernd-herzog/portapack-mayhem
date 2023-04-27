@@ -67,8 +67,8 @@ protected:
 		{ ".TXT", &bitmap_icon_file_text, ui::Color::white() },
 		{ ".PNG", &bitmap_icon_file_image, ui::Color::green() },
 		{ ".BMP", &bitmap_icon_file_image, ui::Color::green() },
-		{ ".C8",  &bitmap_icon_file_iq, ui::Color::blue() },
-		{ ".C16", &bitmap_icon_file_iq, ui::Color::blue() },
+		{ ".C8",  &bitmap_icon_file_iq, ui::Color::dark_cyan() },
+		{ ".C16", &bitmap_icon_file_iq, ui::Color::dark_cyan() },
 		{ ".WAV", &bitmap_icon_file_wav, ui::Color::dark_magenta() },
 		{ "", &bitmap_icon_file, ui::Color::light_grey() }
 	};
@@ -143,6 +143,7 @@ public:
 
 private:
 	std::string name_buffer { };
+	std::string extension_buffer { };
 	
 	void refresh_widgets(const bool v);
 	void on_rename(NavigationView& nav);
