@@ -24,6 +24,7 @@
 
 #include "portapack_shared_memory.hpp"
 #include "audio_output.hpp"
+#include "dsp_filter.hpp"
 #include "dsp_fft.hpp"
 #include "event_m4.hpp"
 
@@ -166,6 +167,11 @@ void WidebandFMAudio::configure(const WFMConfigureMessage& message) {
 
 	spectrum_interval_samples = decim_1_output_fs / spectrum_rate_hz;
 	spectrum_samples = 0;
+
+
+	//replace taps
+	gr::filter::low_pass(1.0, baseband_fs, 100000.0, 384000.0, gr::fft::dsp_window::win_type::WIN_HAMMING, 0.0);
+
 
 	decim_0.configure(message.decim_0_filter.taps, 33554432);
 	decim_1.configure(message.decim_1_filter.taps, 131072);

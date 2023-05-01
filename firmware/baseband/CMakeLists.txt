@@ -141,6 +141,8 @@ set(CPPSRC
 	${COMMON}/gcc.cpp
 	${COMMON}/performance_counter.cpp
 	tone_gen.cpp
+	dsp_window.cpp
+	dsp_filter.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.
