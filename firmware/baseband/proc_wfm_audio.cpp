@@ -170,7 +170,7 @@ void WidebandFMAudio::configure(const WFMConfigureMessage& message) {
 
 
 	//replace taps
-	gr::filter::low_pass(1.0, baseband_fs, 100000.0, 384000.0, gr::fft::dsp_window::win_type::WIN_HAMMING, 0.0);
+	gr::filter::low_pass<gr::fft::win_type::WIN_HAMMING, baseband_fs, 384000>(1.0, 100000.0);
 
 
 	decim_0.configure(message.decim_0_filter.taps, 33554432);

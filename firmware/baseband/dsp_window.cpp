@@ -46,43 +46,43 @@ double freq(int ntaps) { return 2.0 * GR_M_PI / ntaps; }
 
 double rate(int ntaps) { return 1.0 / (ntaps >> 1); }
 
-double dsp_window::max_attenuation(win_type type, double param)
+double dsp_window::max_attenuation(win_type_t type, double param)
 {
     switch (type) {
-    case (WIN_HAMMING):
+    case (win_type::WIN_HAMMING):
         return 53;
-    case (WIN_HANN):
+    case (win_type::WIN_HANN):
         return 44;
-    case (WIN_BLACKMAN):
+    case (win_type::WIN_BLACKMAN):
         return 74;
-    case (WIN_RECTANGULAR):
+    case (win_type::WIN_RECTANGULAR):
         return 21;
-    case (WIN_KAISER):
+    case (win_type::WIN_KAISER):
         // linear approximation
         return (param / 0.1102 + 8.7);
-    case (WIN_BLACKMAN_hARRIS):
+    case (win_type::WIN_BLACKMAN_hARRIS):
         return 92;
-    case (WIN_BARTLETT):
+    case (win_type::WIN_BARTLETT):
         return 27;
-    case (WIN_FLATTOP):
+    case (win_type::WIN_FLATTOP):
         return 93;
-    case WIN_NUTTALL:
+    case win_type::WIN_NUTTALL:
         return 114;
-    case WIN_NUTTALL_CFD:
+    case win_type::WIN_NUTTALL_CFD:
         return 112;
-    case WIN_WELCH:
+    case win_type::WIN_WELCH:
         return 31;
-    case WIN_PARZEN:
+    case win_type::WIN_PARZEN:
         return 56;
-    case WIN_EXPONENTIAL:
+    case win_type::WIN_EXPONENTIAL:
         // varies slightly depending on the decay factor, but this is a safe return value
         return 26;
-    case WIN_RIEMANN:
+    case win_type::WIN_RIEMANN:
         return 39;
-    case WIN_GAUSSIAN:
+    case win_type::WIN_GAUSSIAN:
         // value not meaningful for gaussian windows, but return something reasonable
         return 100;
-    case WIN_TUKEY:
+    case win_type::WIN_TUKEY:
         // low end is a rectangular window, attenuation exponentially approaches Hann
         // piecewise linear estimate, determined empirically via curve fitting, median
         // error is less than 0.5dB and maximum error is 2.5dB; the returned value will
@@ -365,64 +365,6 @@ std::vector<float> dsp_window::gaussian(int ntaps, float sigma)
     return taps;
 }
 
-std::vector<float>
-dsp_window::build(win_type type, int ntaps, double param, const bool normalize)
-{
-    // If we want a normalized window, we get a non-normalized one first, then
-    // normalize it here:
-    if (normalize) {
-        auto win = build(type, ntaps, param, false);
-        const double pwr_acc = // sum(win**2) / len(win)
-            std::accumulate(win.cbegin(),
-                            win.cend(),
-                            0.0,
-                            [](const double a, const double b) { return a + b * b; }) /
-            win.size();
-        const float norm_fac = static_cast<float>(std::sqrt(pwr_acc));
-        std::transform(win.begin(), win.end(), win.begin(), [norm_fac](const float tap) {
-            return tap / norm_fac;
-        });
-        return win;
-    }
-
-    // Create non-normalized window:
-    switch (type) {
-    case WIN_RECTANGULAR:
-        return rectangular(ntaps);
-    case WIN_HAMMING:
-        return hamming(ntaps);
-    case WIN_HANN:
-        return hann(ntaps);
-    case WIN_BLACKMAN:
-        return blackman(ntaps);
-    case WIN_BLACKMAN_hARRIS:
-        return blackman_harris(ntaps);
-    case WIN_KAISER:
-        return kaiser(ntaps, param);
-    case WIN_BARTLETT:
-        return bartlett(ntaps);
-    case WIN_FLATTOP:
-        return flattop(ntaps);
-    case WIN_NUTTALL:
-        return nuttall(ntaps);
-    case WIN_NUTTALL_CFD:
-        return nuttall_cfd(ntaps);
-    case WIN_WELCH:
-        return welch(ntaps);
-    case WIN_PARZEN:
-        return parzen(ntaps);
-    case WIN_EXPONENTIAL:
-        return exponential(ntaps, param);
-    case WIN_RIEMANN:
-        return riemann(ntaps);
-    case WIN_GAUSSIAN:
-        return gaussian(ntaps, param);
-    case WIN_TUKEY:
-        return tukey(ntaps, param);
-    default:
-        return hamming(ntaps);
-    }
-}
 
 } /* namespace fft */
 } /* namespace gr */

@@ -20,38 +20,36 @@ const double GR_M_PI = 3.14159265358979323846;
 namespace gr {
 namespace fft {
 
+namespace win_type {
+    constexpr int8_t WIN_NONE = -1;       //!< don't use a window
+    constexpr int8_t WIN_HAMMING = 0;     //!< Hamming window; max attenuation 53 dB
+    constexpr int8_t WIN_HANN = 1;        //!< Hann window; max attenuation 44 dB
+    constexpr int8_t WIN_HANNING = 1;     //!< alias to WIN_HANN
+    constexpr int8_t WIN_BLACKMAN = 2;    //!< Blackman window; max attenuation 74 dB
+    constexpr int8_t WIN_RECTANGULAR = 3; //!< Basic rectangular window; max attenuation 21 dB
+    constexpr int8_t WIN_KAISER = 4; //!< Kaiser window; max attenuation see window::max_attenuation
+    constexpr int8_t WIN_BLACKMAN_hARRIS = 5; //!< Blackman-harris window; max attenuation 92 dB
+    constexpr int8_t WIN_BLACKMAN_HARRIS = 5;            //!< alias to WIN_BLACKMAN_hARRIS for capitalization consistency
+    constexpr int8_t WIN_BARTLETT = 6; //!< Barlett (triangular) window; max attenuation 26 dB
+    constexpr int8_t WIN_FLATTOP = 7;  //!< flat top window; useful in FFTs; max attenuation 93 dB
+    constexpr int8_t WIN_NUTTALL = 8;  //!< Nuttall window; max attenuation 114 dB
+    constexpr int8_t WIN_BLACKMAN_NUTTALL = 8; //!< Nuttall window; max attenuation 114 dB
+    constexpr int8_t WIN_NUTTALL_CFD = 9; //!< Nuttall continuous-first-derivative window; max attenuation 112 dB
+    constexpr int8_t WIN_WELCH = 10;  //!< Welch window; max attenuation 31 dB
+    constexpr int8_t WIN_PARZEN = 11; //!< Parzen window; max attenuation 56 dB
+    constexpr int8_t WIN_EXPONENTIAL = 12; //!< Exponential window; max attenuation see window::max_attenuation
+    constexpr int8_t WIN_RIEMANN = 13; //!< Riemann window; max attenuation 39 dB
+    constexpr int8_t WIN_GAUSSIAN = 14;         //!< Gaussian window; max attenuation see window::max_attenuation
+    constexpr int8_t WIN_TUKEY = 15; //!< Tukey window; max attenuation see window::max_attenuation
+}
+
+typedef int8_t win_type_t;
+
 class dsp_window
 {
 public:
     // illegal value for any window that requires a parameter
     static constexpr double INVALID_WIN_PARAM = -1;
-
-    enum win_type {
-        WIN_NONE = -1,       //!< don't use a window
-        WIN_HAMMING = 0,     //!< Hamming window; max attenuation 53 dB
-        WIN_HANN = 1,        //!< Hann window; max attenuation 44 dB
-        WIN_HANNING = 1,     //!< alias to WIN_HANN
-        WIN_BLACKMAN = 2,    //!< Blackman window; max attenuation 74 dB
-        WIN_RECTANGULAR = 3, //!< Basic rectangular window; max attenuation 21 dB
-        WIN_KAISER = 4, //!< Kaiser window; max attenuation see window::max_attenuation
-        WIN_BLACKMAN_hARRIS = 5, //!< Blackman-harris window; max attenuation 92 dB
-        WIN_BLACKMAN_HARRIS =
-            5,            //!< alias to WIN_BLACKMAN_hARRIS for capitalization consistency
-        WIN_BARTLETT = 6, //!< Barlett (triangular) window; max attenuation 26 dB
-        WIN_FLATTOP = 7,  //!< flat top window; useful in FFTs; max attenuation 93 dB
-        WIN_NUTTALL = 8,  //!< Nuttall window; max attenuation 114 dB
-        WIN_BLACKMAN_NUTTALL = 8, //!< Nuttall window; max attenuation 114 dB
-        WIN_NUTTALL_CFD =
-            9, //!< Nuttall continuous-first-derivative window; max attenuation 112 dB
-        WIN_WELCH = 10,  //!< Welch window; max attenuation 31 dB
-        WIN_PARZEN = 11, //!< Parzen window; max attenuation 56 dB
-        WIN_EXPONENTIAL =
-            12, //!< Exponential window; max attenuation see window::max_attenuation
-        WIN_RIEMANN = 13, //!< Riemann window; max attenuation 39 dB
-        WIN_GAUSSIAN =
-            14,         //!< Gaussian window; max attenuation see window::max_attenuation
-        WIN_TUKEY = 15, //!< Tukey window; max attenuation see window::max_attenuation
-    };
 
     /*!
      * \brief Given a window::win_type, this tells you the maximum
@@ -84,7 +82,7 @@ public:
      * \param param Parameter value used for Kaiser (beta), Exponential (d), Gaussian
      * (sigma) and Tukey (alpha) window creation.
      */
-    static double max_attenuation(win_type type, double param = INVALID_WIN_PARAM);
+    static double max_attenuation(win_type_t type, double param = INVALID_WIN_PARAM);
 
     /*!
      * \brief Helper function to build cosine-based windows. 3-coefficient version.
@@ -362,10 +360,44 @@ public:
      * (sigma) and Tukey (alpha) window creation. \param normalize If true, return a
      * window with unit power
      */
-    static std::vector<float> build(win_type type,
-                                    int ntaps,
-                                    double param = INVALID_WIN_PARAM,
-                                    const bool normalize = false);
+    // static std::vector<float> build(win_type_t type,
+    //                                 int ntaps,
+    //                                 double param = INVALID_WIN_PARAM);
+
+
+    template<gr::fft::win_type_t window_type, int ntaps>
+    static std::vector<float> build()
+    {
+        // Create non-normalized window:
+        switch (window_type) {
+        case win_type::WIN_RECTANGULAR:
+            return rectangular(ntaps);
+        case win_type::WIN_HAMMING:
+            return hamming(ntaps);
+        case win_type::WIN_HANN:
+            return hann(ntaps);
+        case win_type::WIN_BLACKMAN:
+            return blackman(ntaps);
+        case win_type::WIN_BLACKMAN_hARRIS:
+            return blackman_harris(ntaps);
+        case win_type::WIN_BARTLETT:
+            return bartlett(ntaps);
+        case win_type::WIN_FLATTOP:
+            return flattop(ntaps);
+        case win_type::WIN_NUTTALL:
+            return nuttall(ntaps);
+        case win_type::WIN_NUTTALL_CFD:
+            return nuttall_cfd(ntaps);
+        case win_type::WIN_WELCH:
+            return welch(ntaps);
+        case win_type::WIN_PARZEN:
+            return parzen(ntaps);
+        case win_type::WIN_RIEMANN:
+            return riemann(ntaps);
+        default:
+            return hamming(ntaps);
+        }
+    }
 };
 
 } /* namespace fft */
