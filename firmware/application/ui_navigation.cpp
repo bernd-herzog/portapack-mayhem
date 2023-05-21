@@ -22,7 +22,7 @@
 
 #include "ui_navigation.hpp"
 
-//#include "modules.h"
+// #include "modules.h"
 
 #include "portapack.hpp"
 #include "event_m0.hpp"
@@ -46,13 +46,13 @@
 #include "ui_fileman.hpp"
 #include "ui_freqman.hpp"
 #include "ui_jammer.hpp"
-//#include "ui_keyfob.hpp"
+// #include "ui_keyfob.hpp"
 #include "ui_lcr.hpp"
 #include "ui_mictx.hpp"
 #include "ui_morse.hpp"
-//#include "ui_numbers.hpp"
-//#include "ui_nuoptix.hpp"
-//#include "ui_playdead.hpp"
+// #include "ui_numbers.hpp"
+// #include "ui_nuoptix.hpp"
+// #include "ui_playdead.hpp"
 #include "ui_pocsag_tx.hpp"
 #include "ui_rds.hpp"
 #include "ui_remote.hpp"
@@ -63,9 +63,10 @@
 #include "ui_sd_wipe.hpp"
 #include "ui_settings.hpp"
 #include "ui_siggen.hpp"
+#include "ui_sigview.hpp"
 #include "ui_sonde.hpp"
 #include "ui_sstvtx.hpp"
-//#include "ui_test.hpp"
+// #include "ui_test.hpp"
 #include "ui_text_editor.hpp"
 #include "ui_tone_search.hpp"
 #include "ui_touchtunes.hpp"
@@ -76,7 +77,7 @@
 #include "ui_sd_over_usb.hpp"
 #include "ui_spectrum_painter.hpp"
 
-//#include "acars_app.hpp"
+// #include "acars_app.hpp"
 #include "ais_app.hpp"
 #include "analog_audio_app.hpp"
 #include "analog_tv_app.hpp"
@@ -581,6 +582,7 @@ UtilitiesMenuView::UtilitiesMenuView(NavigationView& nav) {
         {"File manager", ui::Color::yellow(), &bitmap_icon_dir, [&nav]() { nav.push<FileManagerView>(); }},
         {"Notepad", ui::Color::dark_cyan(), &bitmap_icon_notepad, [&nav]() { nav.push<TextEditorView>(); }},
         {"Signal gen", ui::Color::green(), &bitmap_icon_cwgen, [&nav]() { nav.push<SigGenView>(); }},
+        {"Signal view", ui::Color::green(), &bitmap_icon_looking, [&nav]() { nav.push<SignalAnalyserView>(); }},
         //{ "Tone search",	ui::Color::dark_grey(), nullptr,					[&nav](){ nav.push<ToneSearchView>(); } },
         {"Wav viewer", ui::Color::yellow(), &bitmap_icon_soundboard, [&nav]() { nav.push<ViewWavView>(); }},
         {"Antenna length", ui::Color::green(), &bitmap_icon_tools_antenna, [&nav]() { nav.push<WhipCalcView>(); }},

@@ -257,6 +257,7 @@ set(CPPSRC
 	apps/ui_sd_wipe.cpp
 	apps/ui_settings.cpp
 	apps/ui_siggen.cpp
+	apps/ui_sigview.cpp
 	apps/ui_sonde.cpp
 	apps/ui_sstvtx.cpp
 	# apps/ui_test.cpp
