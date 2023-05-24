@@ -77,7 +77,8 @@ class FileManBaseView : public View {
         {u".C8", &bitmap_icon_file_iq, ui::Color::dark_cyan()},
         {u".C16", &bitmap_icon_file_iq, ui::Color::dark_cyan()},
         {u".WAV", &bitmap_icon_file_wav, ui::Color::dark_magenta()},
-        {u"", &bitmap_icon_file, ui::Color::light_grey()}  // NB: Must be last.
+        {u".PPL", &bitmap_icon_file_iq, ui::Color::white()},  // PPL is the file extension for playlist app
+        {u"", &bitmap_icon_file, ui::Color::light_grey()}     // NB: Must be last.
     };
 
     std::filesystem::path get_selected_full_path() const;
@@ -120,7 +121,7 @@ class FileManBaseView : public View {
         ""};
 
     Button button_exit{
-        {21 * 8, 34 * 8, 9 * 8, 32},
+        {22 * 8, 34 * 8, 8 * 8, 32},
         "Exit"};
 };
 
@@ -263,6 +264,12 @@ class FileManagerView : public FileManBaseView {
         {},
         &bitmap_icon_new_file,
         Color::green()};
+
+    NewButton button_open_notepad{
+        {0 * 8, 34 * 8, 4 * 8, 32},
+        {},
+        &bitmap_icon_notepad,
+        Color::orange()};
 };
 
 } /* namespace ui */

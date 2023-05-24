@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2015 Jared Boone, ShareBrained Technology, Inc.
  * Copyright (C) 2016 Furrtek
+ * Copyright (C) 2023 gullradriel, Nilorea Studio Inc.
  *
  * This file is part of PortaPack.
  *
@@ -195,6 +196,15 @@ SetRadioView::SetRadioView(
     check_bias.set_value(portapack::get_antenna_bias());
     check_bias.on_select = [this](Checkbox&, bool v) {
         portapack::set_antenna_bias(v);
+
+        // Update the radio.
+        receiver_model.set_antenna_bias();
+        transmitter_model.set_antenna_bias();
+        // The models won't actually disable this if they are not 'enabled_'.
+        // Be extra sure this is turned off.
+        if (!v)
+            radio::set_antenna_bias(false);
+
         StatusRefreshMessage message{};
         EventDispatcher::send_message(message);
     };
@@ -398,8 +408,8 @@ SetFrequencyCorrectionView::SetFrequencyCorrectionView(NavigationView& nav) {
     button_freq_rx_correction.on_select = [this, &nav](Button& button) {
         auto new_view = nav.push<FrequencyKeypadView>(portapack::persistent_memory::config_converter_freq());
         new_view->on_changed = [this, &button](rf::Frequency f) {
-            if (f > 4000000)
-                f = 4000000;
+            if (f >= MAX_FREQ_CORRECTION)
+                f = MAX_FREQ_CORRECTION;
             portapack::persistent_memory::set_config_freq_rx_correction(f);
             // Retune to take converter change in account
             receiver_model.set_tuning_frequency(portapack::persistent_memory::tuned_frequency());
@@ -411,8 +421,8 @@ SetFrequencyCorrectionView::SetFrequencyCorrectionView(NavigationView& nav) {
     button_freq_tx_correction.on_select = [this, &nav](Button& button) {
         auto new_view = nav.push<FrequencyKeypadView>(portapack::persistent_memory::config_converter_freq());
         new_view->on_changed = [this, &button](rf::Frequency f) {
-            if (f > 4000000)
-                f = 4000000;
+            if (f >= MAX_FREQ_CORRECTION)
+                f = MAX_FREQ_CORRECTION;
             portapack::persistent_memory::set_config_freq_tx_correction(f);
             // Retune to take converter change in account
             receiver_model.set_tuning_frequency(portapack::persistent_memory::tuned_frequency());

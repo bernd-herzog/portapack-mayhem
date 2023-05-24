@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2014 Jared Boone, ShareBrained Technology, Inc.
  * Copyright (C) 2016 Furrtek
+ * Copyright (C) 2023 gullradriel, Nilorea Studio Inc.
  *
  * This file is part of PortaPack.
  *
@@ -315,7 +316,6 @@ bool save_freqman_file(std::string& file_stem, freqman_db& db) {
             auto& entry = db[n];
             get_freq_string(entry, item_string);
             freqman_file.write_line(item_string);
-            delete &item_string;
         }
         delete_file(freq_file_path);
         rename_file(tmp_freq_file_path, freq_file_path);

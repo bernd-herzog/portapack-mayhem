@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2015 Jared Boone, ShareBrained Technology, Inc.
  * Copyright (C) 2018 Furrtek
+ * Copyright (C) 2023 gullradriel, Nilorea Studio Inc.
  *
  * This file is part of PortaPack.
  *
@@ -41,6 +42,8 @@
 #include "ui_recon_settings.hpp"
 
 namespace ui {
+
+#define RECON_CFG_FILE "SETTINGS/recon.cfg"
 
 class ReconView : public View {
    public:
@@ -98,6 +101,8 @@ class ReconView : public View {
    private:
     NavigationView& nav_;
 
+    void clear_freqlist_for_ui_action();
+    void reset_indexes();
     void audio_output_start();
     bool check_sd_card();
     size_t change_mode(freqman_index_t mod_type);
@@ -109,13 +114,13 @@ class ReconView : public View {
     void on_headphone_volume_changed(int32_t v);
     void on_index_delta(int32_t v);
     void on_stepper_delta(int32_t v);
+    void colorize_waits();
     void recon_redraw();
     void handle_retune();
     void handle_coded_squelch(const uint32_t value);
-    bool ReconSetupLoadStrings(const std::string& source, std::string& input_file, std::string& output_file, uint32_t& recon_lock_duration, uint32_t& recon_lock_nb_match, int32_t& recon_squelch_level, uint32_t& recon_match_mode, int32_t& wait, int32_t& volume);
-    bool ReconSetupSaveStrings(const std::string& dest, const std::string& input_file, const std::string& output_file, uint32_t recon_lock_duration, uint32_t recon_lock_nb_match, int32_t recon_squelch_level, uint32_t recon_match_mode, int32_t wait, int32_t volume);
-    bool ReconSaveFreq(const std::string& freq_file_path, size_t index, bool warn_if_exists);
-
+    bool recon_load_config_from_sd();
+    bool recon_save_config_to_sd();
+    bool recon_save_freq(const std::string& freq_file_path, size_t index, bool warn_if_exists);
     jammer::jammer_range_t frequency_range{false, 0, MAX_UFREQ};  // perfect for manual recon task too...
     int32_t squelch{0};
     int32_t db{0};
@@ -123,10 +128,11 @@ class ReconView : public View {
     int32_t wait{RECON_DEF_WAIT_DURATION};  // in msec. if > 0 wait duration after a lock, if < 0 duration is set to 'wait' unless there is no more activity
     freqman_db frequency_list = {};
     int32_t current_index{0};
-    bool userpause{false};
     bool continuous_lock{false};
+    bool freqlist_cleared_for_ui_action{false};  // flag positioned by ui widgets to manage freqlist unload/load
     std::string input_file = {"RECON"};
     std::string output_file = {"RECON_RESULTS"};
+    std::string description = {"...no description..."};
     bool autosave = {true};
     bool autostart = {true};
     bool continuous = {true};
@@ -227,15 +233,21 @@ class ReconView : public View {
     };
 
     RSSI rssi{
-        {0 * 16, 2 * 16, SCREEN_W - 8 * 8 + 4, 16},
+        {0 * 16, 2 * 16, SCREEN_W - 8 * 8 + 4, 14},
     };
 
     ButtonWithEncoder text_cycle{
         {0, 3 * 16, 4 * 8, 16},
         ""};
 
+    // "/XXX -XXX db" =>  12 chars max
     Text text_max{
-        {4 * 8, 3 * 16, SCREEN_W - 7 * 8 - 4 * 8, 16},
+        {4 * 8, 3 * 16, 12 * 8, 16},
+    };
+
+    // "XX/XX" =>  5 chars max
+    Text text_nb_locks{
+        {16 * 8, 3 * 16, 5 * 8, 16},
     };
 
     Text desc_cycle{
@@ -263,7 +275,7 @@ class ReconView : public View {
         {12 * 8 + 4, 7 * 16, 14 * 8, 1 * 8},
         ""};
 
-    Button button_recon_setup{
+    Button button_config{
         {SCREEN_W - 7 * 8, 2 * 16, 7 * 8, 28},
         "CONFIG"};
 

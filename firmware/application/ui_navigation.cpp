@@ -308,11 +308,10 @@ void SystemStatusView::on_stealth() {
 }
 
 void SystemStatusView::on_bias_tee() {
-    if (!portapack::antenna_bias) {
+    if (!portapack::get_antenna_bias()) {
         nav_.display_modal("Bias voltage", "Enable DC voltage on\nantenna connector?", YESNO, [this](bool v) {
             if (v) {
                 portapack::set_antenna_bias(true);
-                // radio::set_antenna_bias(true);
                 receiver_model.set_antenna_bias();
                 transmitter_model.set_antenna_bias();
                 refresh();
@@ -320,9 +319,12 @@ void SystemStatusView::on_bias_tee() {
         });
     } else {
         portapack::set_antenna_bias(false);
-        // radio::set_antenna_bias(false);
         receiver_model.set_antenna_bias();
         transmitter_model.set_antenna_bias();
+
+        // Ensure this is disabled. The models don't actually
+        // update the radio unless they are 'enabled_'.
+        radio::set_antenna_bias(false);
         refresh();
     }
 }
@@ -564,7 +566,7 @@ TransmittersMenuView::TransmittersMenuView(NavigationView& nav) {
         {"SSTV", ui::Color::green(), &bitmap_icon_sstv, [&nav]() { nav.push<SSTVTXView>(); }},
         {"TEDI/LCR", ui::Color::yellow(), &bitmap_icon_lcr, [&nav]() { nav.push<LCRView>(); }},
         {"TouchTune", ui::Color::yellow(), &bitmap_icon_remote, [&nav]() { nav.push<TouchTunesView>(); }},
-        {"Playlist", ui::Color::yellow(), &bitmap_icon_remote, [&nav]() { nav.push<PlaylistView>(); }},
+        {"Playlist", ui::Color::green(), &bitmap_icon_scanner, [&nav]() { nav.push<PlaylistView>(); }},
         {"S.Painter", ui::Color::orange(), &bitmap_icon_morse, [&nav]() { nav.push<SpectrumPainterView>(); }},
         //{ "Remote",			ui::Color::dark_grey(),	&bitmap_icon_remote,	[&nav](){ nav.push<RemoteView>(); } },
     });

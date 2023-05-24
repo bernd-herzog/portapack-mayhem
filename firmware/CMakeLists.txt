@@ -35,6 +35,7 @@ set(FIRMWARE_FILENAME ${FIRMWARE_NAME}.bin)
 
 add_subdirectory(application)
 add_subdirectory(baseband)
+add_subdirectory(test)
 
 # NOTE: Dependencies break if the .bin files aren't included in DEPENDS. WTF, CMake?
 add_custom_command(
@@ -52,7 +53,7 @@ add_custom_target(
 
 add_custom_target(
 	program
-	COMMAND dfu-util --device 1fc9:000c --download ${HACKRF_FIRMWARE_DFU_IMAGE}
+	COMMAND dfu-util --device 1fc9:000c --download ${HACKRF_FIRMWARE_DFU_IMAGE} || (exit 0) # We need to add it for dfu-utils v.011 , (in v.09 it is not necessary)
 	COMMAND sleep 3s
 	COMMAND hackrf_spiflash -w ${FIRMWARE_FILENAME}
 	DEPENDS ${FIRMWARE_FILENAME}

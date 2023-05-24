@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2015 Jared Boone, ShareBrained Technology, Inc.
  * Copyright (C) 2016 Furrtek
+ * Copyright (C) 2023 gullradriel, Nilorea Studio Inc.
  *
  * This file is part of PortaPack.
  *
@@ -32,6 +33,8 @@
 #include <cstdint>
 
 namespace ui {
+
+#define MAX_FREQ_CORRECTION 4294967295  // maximum possible for an uint32_t
 
 struct SetDateTimeModel {
     uint16_t year;

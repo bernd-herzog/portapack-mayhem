@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2015 Jared Boone, ShareBrained Technology, Inc.
  * Copyright (C) 2020 euquiq
+ * Copyright (C) 2023 gullradriel, Nilorea Studio Inc.
  *
  * This file is part of PortaPack.
  *
@@ -96,8 +97,10 @@ void GlassView::adjust_range(int64_t* f_min, int64_t* f_max, int64_t width) {
 }
 
 void GlassView::retune() {
-    // Start a new sweep
-    radio::set_tuning_frequency(f_center);  // tune rx for this new slice directly, faster than using persistent memory saving
+    // Start a new sweep.
+    // Tune rx for this new slice directly because the model
+    // saves to persistent memory which is slower.
+    radio::set_tuning_frequency(f_center);
     chThdSleepMilliseconds(5);
     baseband::spectrum_streaming_start();  // Do the RX
 }
@@ -143,9 +146,13 @@ void GlassView::add_spectrum_pixel(uint8_t power) {
                 // save max powerwull freq
                 if (spectrum_data[xpos] > max_freq_power) {
                     max_freq_power = spectrum_data[xpos];
-                    max_freq_hold = f_center + ((looking_glass_range)*xpos) / SCREEN_W;
+                    if (mode == LOOKING_GLASS_SINGLEPASS) {
+                        max_freq_hold = f_min + (xpos * looking_glass_range) / SCREEN_W;
+                    } else  // if( mode == LOOKING_GLASS_SLOWSCAN || mode == LOOKING_GLASS_FASTSCAN )
+                    {
+                        max_freq_hold = f_min + (offset * each_bin_size) + (xpos * looking_glass_range) / SCREEN_W;
+                    }
                 }
-
                 int16_t point = y_max_range.clip(((spectrum_data[xpos] - raw_min) * (320 - (108 + 16))) / raw_delta);
                 uint8_t color_gradient = (point * 255) / 212;
                 // clear if not in peak view
