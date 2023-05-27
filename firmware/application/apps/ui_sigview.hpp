@@ -36,20 +36,76 @@ class SignalAnalyserView : public View {
     SignalAnalyserView(NavigationView& nav);
     ~SignalAnalyserView();
 
-    // void focus() override;
+    void focus() override;
 
     std::string title() const override { return "Signal view"; };
 
    private:
+    void on_show_options_modulation(size_t option);
+    void on_show_options_frequency();
+
     OptionsField options_modulation{
         {0 * 8, 0 * 16},
         4,
         {
-            {"RAW ", 0},
-            {" FM ", 1},
-            {" AM ", 2},
-        }
+            // How to get to the signal where the bits can be read
+            {"OOK ", 0},
+            {"AM  ", 1},
+            {"BPSK", 2},
+            {"QPSK", 3},
+            {"QAM ", 4},  // needs sync
+            {"FSK ", 5},  // FM demod eg. HC-12
+            {"AFSK", 6},  // double FM
+            {"DSSS", 7},  // FSK with repeated sequence for a bit
+        }};
+
+    FrequencyField field_frequency{
+        {5 * 8, 0 * 16},
     };
+
+    LNAGainField field_lna{
+        {15 * 8, 0 * 16}};
+
+    VGAGainField field_vga{
+        {18 * 8, 0 * 16}};
+
+    RSSI rssi{
+        {21 * 8, 0, 6 * 8, 4},
+    };
+
+    Channel channel{
+        {21 * 8, 5, 6 * 8, 4},
+    };
+
+    Audio audio{
+        {21 * 8, 10, 6 * 8, 4},
+    };
+
+    NumberField field_volume{
+        {28 * 8, 0 * 16},
+        2,
+        {0, 99},
+        1,
+        ' ',
+    };
+
+    Text label_config{
+        {0 * 8, 1 * 16, 2 * 8, 1 * 16},
+        "BW",
+    };
+
+    OptionsField field_bw{
+        // 1.2k inc by 100Hz
+        // 8.5k inc by 500Hz
+        // 15k, inc by 1kHz
+        {3 * 8, 1 * 16},
+        4,
+        {
+            // calculate in code
+            {"1.5k", 0},
+            {"  2k", 1},
+            {"2.5k", 2},
+        }};
 
     // freq + step
     // gain + power view

@@ -464,6 +464,14 @@ set(MODE_CPPSRC
 )
 DeclareTargets(PSIG siggen)
 
+### Signal viewer
+
+set(MODE_CPPSRC
+	proc_sigview.cpp
+)
+DeclareTargets(PSVW sigview)
+
+
 ### Spectrum painter
 
 set(MODE_CPPSRC
