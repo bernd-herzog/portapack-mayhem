@@ -69,14 +69,13 @@ class SignalAnalyserView : public View {
     VGAGainField field_vga{
         {18 * 8, 0 * 16}};
 
+    // TODO: remove ?
     RSSI rssi{
         {21 * 8, 0, 6 * 8, 4},
     };
-
     Channel channel{
         {21 * 8, 5, 6 * 8, 4},
     };
-
     Audio audio{
         {21 * 8, 10, 6 * 8, 4},
     };
@@ -89,15 +88,16 @@ class SignalAnalyserView : public View {
         ' ',
     };
 
+    // TODO: hide in options
     Text label_config{
         {0 * 8, 1 * 16, 2 * 8, 1 * 16},
         "BW",
     };
-
     OptionsField field_bw{
         // 1.2k inc by 100Hz
         // 8.5k inc by 500Hz
         // 15k, inc by 1kHz
+        // TODO: onclick: allow any value
         {3 * 8, 1 * 16},
         4,
         {
