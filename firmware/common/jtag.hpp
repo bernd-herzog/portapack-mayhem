@@ -58,6 +58,8 @@ namespace jtag
         void runtest_tck(const size_t count)
         {
             target.delay(count);
+            // for (int i = 0; i < count; i++)
+            //     run_test_idle();
         }
 
         uint32_t shift_ir(const size_t count, const uint32_t value)
@@ -88,29 +90,6 @@ namespace jtag
             target.clock(0, 0);
 
             const auto result = shift(count, value);
-
-            /* Exit1 -> Update */
-            target.clock(1, 0);
-            /* Update -> Run-Test/Idle */
-            target.clock(0, 0);
-
-            return result;
-        }
-
-        uint32_t shift_id_code()
-        {
-            /* Run-Test/Idle -> Select-DR-Scan */
-            target.clock(1, 0);
-            target.clock(1, 0);
-            target.clock(1, 0);
-            target.clock(1, 0);
-            /* Scan -> Capture -> Shift */
-            target.clock(1, 0);
-            target.clock(0, 0);
-            target.clock(1, 0);
-            target.clock(0, 0);
-
-            const auto result = shift(32, 0);
 
             /* Exit1 -> Update */
             target.clock(1, 0);

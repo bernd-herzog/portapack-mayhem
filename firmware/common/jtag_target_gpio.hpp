@@ -92,15 +92,23 @@ namespace jtag
             /* TODO: Use more precise timing mechanism, using the frequency
              * specified by SVF file.
              */
-            // const auto result = tdo();
+            const auto result = tdo();
             tms(tms_value);
             tdi(tdi_value);
             __asm__("nop");
             __asm__("nop");
             __asm__("nop");
-            // __asm__("nop");
-            // __asm__("nop");
-            // __asm__("nop");
+
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
             tck(1);
             __asm__("nop");
             __asm__("nop");
@@ -108,6 +116,22 @@ namespace jtag
             __asm__("nop");
             __asm__("nop");
             // __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            // __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
             tck(0);
             __asm__("nop");
             __asm__("nop");
@@ -116,8 +140,31 @@ namespace jtag
             __asm__("nop");
             __asm__("nop");
             __asm__("nop");
-            const auto result2 = tdo();
-            return result2;
+
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            // const auto result2 = tdo();
+            return result;
         }
 
     private:

@@ -172,8 +172,26 @@ namespace cpld
 
         uint32_t CPLD::get_idcode()
         {
-            // shift_ir(instruction_t::IDCODE);
-            const auto idcode_read = jtag.shift_id_code();
+            // // shift_ir(instruction_t::IDCODE);
+            // const auto idcode_read = jtag.shift_id_code();
+            // return idcode_read;
+
+            //
+            // reset();
+            // run_test_idle();
+
+            shift_ir(0x3f8);
+            jtag.runtest_tck(100); // 5us
+            shift_ir(0x3f9);
+            jtag.runtest_tck(100); // 5us
+            shift_ir(0x3f8);
+            jtag.runtest_tck(100); // 5us
+
+            shift_ir(0x6);
+            // const auto idcode_read = jtag.shift_ir(10, 0x6);
+            jtag.runtest_tck(100); // 5us
+
+            const auto idcode_read = jtag.shift_dr(idcode_length, 0x0);
             return idcode_read;
         }
 
