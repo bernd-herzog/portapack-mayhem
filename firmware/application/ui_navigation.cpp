@@ -76,6 +76,7 @@
 #include "ui_whipcalc.hpp"
 #include "ui_flash_utility.hpp"
 #include "ui_sd_over_usb.hpp"
+#include "ui_sd_example.hpp"
 #include "ui_spectrum_painter.hpp"
 #include "ui_ss_viewer.hpp"
 
@@ -573,6 +574,7 @@ UtilitiesMenuView::UtilitiesMenuView(NavigationView& nav) {
         {"Wipe SD card", Color::red(), &bitmap_icon_tools_wipesd, [&nav]() { nav.push<WipeSDView>(); }},
         {"Flash Utility", Color::red(), &bitmap_icon_temperature, [&nav]() { nav.push<FlashUtilityView>(); }},
         {"SD over USB", Color::yellow(), &bitmap_icon_hackrf, [&nav]() { nav.push<SdOverUsbView>(); }},
+        {"SD Example", Color::dark_blue(), &bitmap_icon_morse, [&nav]() { nav.push<SdExampleView>(); }},
     });
     set_max_rows(2);  // allow wider buttons
 }

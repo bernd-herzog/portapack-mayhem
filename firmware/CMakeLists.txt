@@ -26,6 +26,7 @@ set(CHIBIOS ${PROJECT_SOURCE_DIR}/chibios)
 set(CHIBIOS_PORTAPACK ${PROJECT_SOURCE_DIR}/chibios-portapack)
 
 set(EXTRACT_CPLD_DATA ${PROJECT_SOURCE_DIR}/tools/extract_cpld_data.py)
+set(MAKE_EXT_IMPORTS ${PROJECT_SOURCE_DIR}/tools/make_ext_app_linker_imports.py)
 set(MAKE_SPI_IMAGE ${PROJECT_SOURCE_DIR}/tools/make_spi_image.py)
 set(MAKE_IMAGE_CHUNK ${PROJECT_SOURCE_DIR}/tools/make_image_chunk.py)
 set(LZ4 lz4)
@@ -34,6 +35,7 @@ set(FIRMWARE_NAME portapack-h1_h2-mayhem)
 set(FIRMWARE_FILENAME ${FIRMWARE_NAME}.bin)
 
 add_subdirectory(application)
+add_subdirectory(application_sd)
 add_subdirectory(baseband)
 add_subdirectory(test)
 
@@ -41,7 +43,7 @@ add_subdirectory(test)
 add_custom_command(
 	OUTPUT ${FIRMWARE_FILENAME}
 	COMMAND ${MAKE_SPI_IMAGE} ${application_BINARY_DIR}/application.bin ${baseband_BINARY_DIR}/baseband.img ${FIRMWARE_FILENAME}
-	DEPENDS baseband application ${MAKE_SPI_IMAGE}
+	DEPENDS baseband application application_sd ${MAKE_SPI_IMAGE}
 		 ${baseband_BINARY_DIR}/baseband.img ${application_BINARY_DIR}/application.bin
 	VERBATIM
 )
@@ -55,7 +57,7 @@ add_custom_target(
 	program
 	COMMAND dfu-util --device 1fc9:000c --download ${HACKRF_FIRMWARE_DFU_IMAGE} || (exit 0) # We need to add it for dfu-utils v.011 , (in v.09 it is not necessary)
 	COMMAND sleep 3s
-	COMMAND hackrf_spiflash -w ${FIRMWARE_FILENAME}
+	COMMAND hackrf_spiflash -i -w ${FIRMWARE_FILENAME}
 	DEPENDS ${FIRMWARE_FILENAME}
 )
 
