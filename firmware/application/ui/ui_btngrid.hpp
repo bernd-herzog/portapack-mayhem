@@ -53,6 +53,7 @@ class BtnGridView : public View {
 
     ~BtnGridView();
 
+    void add_item(GridItem new_item);
     void add_items(std::initializer_list<GridItem> new_items);
     void set_max_rows(int rows);
     int rows();

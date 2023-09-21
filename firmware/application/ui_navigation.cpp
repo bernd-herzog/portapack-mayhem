@@ -76,9 +76,9 @@
 #include "ui_whipcalc.hpp"
 #include "ui_flash_utility.hpp"
 #include "ui_sd_over_usb.hpp"
-#include "ui_sd_example.hpp"
 #include "ui_spectrum_painter.hpp"
 #include "ui_ss_viewer.hpp"
+#include "ui_external_items_menu_loader.hpp"
 
 // #include "acars_app.hpp"
 #include "ais_app.hpp"
@@ -561,6 +561,7 @@ UtilitiesMenuView::UtilitiesMenuView(NavigationView& nav) {
     if (pmem::show_gui_return_icon()) {
         add_items({{"..", Color::light_grey(), &bitmap_icon_previous, [&nav]() { nav.pop(); }}});
     }
+
     add_items({
         //{ "Test app", 		Color::dark_grey(),	nullptr,				[&nav](){ nav.push<TestView>(); } },
         {"Freq. manager", Color::green(), &bitmap_icon_freqman, [&nav]() { nav.push<FrequencyManagerView>(); }},
@@ -574,8 +575,12 @@ UtilitiesMenuView::UtilitiesMenuView(NavigationView& nav) {
         {"Wipe SD card", Color::red(), &bitmap_icon_tools_wipesd, [&nav]() { nav.push<WipeSDView>(); }},
         {"Flash Utility", Color::red(), &bitmap_icon_temperature, [&nav]() { nav.push<FlashUtilityView>(); }},
         {"SD over USB", Color::yellow(), &bitmap_icon_hackrf, [&nav]() { nav.push<SdOverUsbView>(); }},
-        {"SD Example", Color::dark_blue(), &bitmap_icon_morse, [&nav]() { nav.push<SdExampleView>(); }},
     });
+
+    for (auto const& gridItem : ExternalItemsMenuLoader::load_external_items(app_location_t::UTILITIES, nav)) {
+        add_item(gridItem);
+    };
+
     set_max_rows(2);  // allow wider buttons
 }
 

@@ -44,7 +44,7 @@ if(cpp20_supported)
 else()
 	set(USE_CPPOPT "-std=c++17")
 endif()
-set(USE_CPPOPT "${USE_CPPOPT} -flto -fno-rtti -fno-exceptions -Weffc++ -Wuninitialized -Wno-volatile")
+set(USE_CPPOPT "${USE_CPPOPT} -fno-rtti -fno-exceptions -Weffc++ -Wuninitialized -Wno-volatile")
 
 # Enable this if you want the linker to remove unused code and data
 set(USE_LINK_GC yes)
@@ -216,6 +216,7 @@ set(CPPSRC
 	hw/touch_adc.cpp
 	ui_baseband_stats_view.cpp
 	ui_navigation.cpp
+	ui_external_items_menu_loader.cpp
 	ui_playdead.cpp
 	ui_record_view.cpp
 	ui_sd_card_status_view.cpp
