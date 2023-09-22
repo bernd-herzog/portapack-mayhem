@@ -18,42 +18,20 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
+#include "ch.h"
+#include "external_apps.h"
+// #include "ui_widget.hpp"
 
-#ifndef __UI_SD_EXAMPLE_H__
-#define __UI_SD_EXAMPLE_H__
+extern void app_main(void*, void** p);
+extern uint32_t __flash_start__;
 
-#include "ui_widget.hpp"
-#include "ui_navigation.hpp"
-#include "string_format.hpp"
-#include "ff.h"
-#include "baseband_api.hpp"
-#include "core_control.hpp"
+void ExternalAppEntry(void*, void**);
 
-#include <cstdint>
+__attribute__((section("application_information"))) application_information_t _application_information = {
+    0,
+    ExternalAppEntry,
+    &__flash_start__ /*(void*)0x10088000*/};
 
-namespace ui {
-
-class SdExampleView : public View {
-   public:
-    SdExampleView(NavigationView& nav);
-
-    void focus() override;
-
-    std::string title() const override { return "SD Example"; };
-
-   private:
-    NavigationView& nav_;
-
-    Labels labels{
-        {{3 * 8, 2 * 16}, "Click Run to start the", Color::white()},
-        {{3 * 8, 3 * 16}, "Example.", Color::white()},
-    };
-
-    Button button_run{
-        {9 * 8, 15 * 16, 12 * 8, 3 * 16},
-        "Run"};
-};
-
-} /* namespace ui */
-
-#endif /*__UI_SD_EXAMPLE_H__*/
+void ExternalAppEntry(void* nav, void** p) {
+    app_main(nav, p);
+}

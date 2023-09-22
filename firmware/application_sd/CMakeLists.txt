@@ -45,7 +45,7 @@ if(cpp20_supported)
 else()
 	set(USE_CPPOPT "-std=c++17")
 endif()
-set(USE_CPPOPT "${USE_CPPOPT} -fno-rtti -fno-exceptions -Weffc++ -Wuninitialized -Wno-volatile")
+set(USE_CPPOPT "${USE_CPPOPT} -flto -fno-rtti -fno-exceptions -Weffc++ -Wuninitialized -Wno-volatile")
 
 # Enable this if you want the linker to remove unused code and data
 set(USE_LINK_GC yes)
@@ -97,14 +97,17 @@ set(LDSCRIPT "${PORTLD}/LPC43xx_M0_ram.ld")
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 set(CSRC
-	main.c
+	entry.c
 )
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 set(CPPSRC
-	app.cpp
-	${COMMON}/chibios_cpp.cpp # for heap access
+	${COMMON}/chibios_cpp.cpp
+	${COMMON}/gcc.cpp
+	main.cpp
+	ui_sd_example.cpp
+	${COMMON}/ui_widget.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.
@@ -232,7 +235,7 @@ set_target_properties(${PROJECT_NAME}.elf PROPERTIES LINK_DEPENDS ${LDSCRIPT})
 add_definitions(${DEFS})
 include_directories(. ${INCDIR})
 link_directories(${LLIBDIR})
-target_link_libraries(${PROJECT_NAME}.elf ${LIBS} "-L../application/")
+target_link_libraries(${PROJECT_NAME}.elf ${LIBS} "-L${CMAKE_CURRENT_BINARY_DIR}/../application/")
 target_link_libraries(${PROJECT_NAME}.elf -Wl,-Map=${PROJECT_NAME}.map)
 
 add_custom_command(

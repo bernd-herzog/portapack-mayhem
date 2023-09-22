@@ -255,7 +255,6 @@ set(CPPSRC
 	apps/ui_fileman.cpp
 	apps/ui_flash_utility.cpp
 	apps/ui_sd_over_usb.cpp
-	apps/ui_sd_example.cpp
 	apps/ui_freqman.cpp
 	apps/ui_jammer.cpp
     #apps/ui_keyfob.cpp

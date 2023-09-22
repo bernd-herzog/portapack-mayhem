@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2023 Bernd Herzog
  *
@@ -20,26 +19,19 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef __EXTERNAL_ITEMS_MENU_LOADER_H__
-#define __EXTERNAL_ITEMS_MENU_LOADER_H__
+#ifndef __EXTERNAL_APPS_H__
+#define __EXTERNAL_APPS_H__
 
-#include "ui.hpp"
-#include "ui_navigation.hpp"
+#define ADDRESS_MEMORY_SPACE 0x10088000
 
-namespace ui {
+typedef void (*externalAppEntry_t)(void* /*(NavigationView&)*/, void**);
 
-enum app_location_t {
-    UTILITIES = 0,
-    RX,
-    TX
-};
+typedef struct {
+    uint32_t location;
+    externalAppEntry_t externalAppEntry;
+    void* memory_location;
+    // TODO: add version check (md5 of .ld)
+    // TODO: add icon and text
+} application_information_t;
 
-class ExternalItemsMenuLoader {
-   public:
-    static std::vector<GridItem> load_external_items(app_location_t, NavigationView&);
-    ExternalItemsMenuLoader() = delete;
-};
-
-}  // namespace ui
-
-#endif /*__EXTERNAL_ITEMS_MENU_LOADER_H__*/
+#endif /*__EXTERNAL_APPS_H__*/

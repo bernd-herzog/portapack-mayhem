@@ -135,6 +135,7 @@ void Widget::focus() {
 
 void Widget::on_focus() {
     // set_dirty();
+    __asm__("nop");
 }
 
 void Widget::blur() {

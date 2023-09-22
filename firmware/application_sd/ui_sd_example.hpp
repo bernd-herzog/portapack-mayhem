@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2023 Bernd Herzog
  *
@@ -20,26 +19,41 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef __EXTERNAL_ITEMS_MENU_LOADER_H__
-#define __EXTERNAL_ITEMS_MENU_LOADER_H__
+#ifndef __UI_SD_EXAMPLE_H__
+#define __UI_SD_EXAMPLE_H__
 
-#include "ui.hpp"
+#include "ui_widget.hpp"
 #include "ui_navigation.hpp"
+#include "string_format.hpp"
+#include "ff.h"
+#include "baseband_api.hpp"
+#include "core_control.hpp"
+
+#include <cstdint>
 
 namespace ui {
 
-enum app_location_t {
-    UTILITIES = 0,
-    RX,
-    TX
-};
-
-class ExternalItemsMenuLoader {
+class SdExampleView : public View {
    public:
-    static std::vector<GridItem> load_external_items(app_location_t, NavigationView&);
-    ExternalItemsMenuLoader() = delete;
+    SdExampleView(NavigationView& nav);
+
+    void focus() override;
+
+    std::string title() const override { return "SD Example"; };
+
+   private:
+    NavigationView& nav_;
+
+    Labels labels{
+        {{3 * 8, 2 * 16}, "Click Run to start the", Color::white()},
+        {{3 * 8, 3 * 16}, "Example.", Color::white()},
+    };
+
+    // Button button_run{
+    //     {9 * 8, 15 * 16, 12 * 8, 3 * 16},
+    //     "Run"};
 };
 
-}  // namespace ui
+} /* namespace ui */
 
-#endif /*__EXTERNAL_ITEMS_MENU_LOADER_H__*/
+#endif /*__UI_SD_EXAMPLE_H__*/

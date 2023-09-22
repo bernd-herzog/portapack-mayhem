@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2023 Bernd Herzog
  *
@@ -19,27 +18,21 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
-
-#ifndef __EXTERNAL_ITEMS_MENU_LOADER_H__
-#define __EXTERNAL_ITEMS_MENU_LOADER_H__
-
-#include "ui.hpp"
 #include "ui_navigation.hpp"
+#include "ui_widget.hpp"
+#include "ui_sd_example.hpp"
 
-namespace ui {
+#include "ch.h"
+#include "string.h"
 
-enum app_location_t {
-    UTILITIES = 0,
-    RX,
-    TX
-};
+// TODO: integrate https://github.com/MhageGH/esp32_ILI9328_Pacman
 
-class ExternalItemsMenuLoader {
-   public:
-    static std::vector<GridItem> load_external_items(app_location_t, NavigationView&);
-    ExternalItemsMenuLoader() = delete;
-};
+void initialize_app(ui::NavigationView& nav, void** p) {
+    auto obj = (void*)new ui::SdExampleView(nav);
+    *p = obj;
+    return;
+}
 
-}  // namespace ui
-
-#endif /*__EXTERNAL_ITEMS_MENU_LOADER_H__*/
+extern "C" void app_main(void* nav, void** p) {
+    initialize_app(reinterpret_cast<ui::NavigationView&>(nav), p);
+}

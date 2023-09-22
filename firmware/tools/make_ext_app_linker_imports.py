@@ -37,8 +37,11 @@ adress = ''
 for line in f:
 	if line.startswith(' .text.'):
 		functionname = line[7:-1]
-		#print(line)
-		#print(functionname)
+		if "." not in functionname:
+			i = True
+		continue
+	elif line.startswith(' .rodata.'):
+		functionname = line[9:-1]
 		if "." not in functionname:
 			i = True
 		continue
