@@ -84,4 +84,15 @@ void SdExampleView::focus() {
     // button_run.focus();
 }
 
+void SdExampleView::paint(Painter& painter) {
+    View::paint(painter);
+
+    painter.fill_rectangle(
+        {0 + 80, 0 + 80, portapack::display.width() - 160, portapack::display.height() - 160},
+        is_blue ? ui::Color::blue() : ui::Color::red());
+
+    is_blue = !is_blue;
+    set_dirty();
+}
+
 } /* namespace ui */

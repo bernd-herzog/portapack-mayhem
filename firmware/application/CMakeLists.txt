@@ -466,12 +466,12 @@ add_definitions(${DEFS})
 include_directories(. ${INCDIR})
 link_directories(${LLIBDIR})
 target_link_libraries(${PROJECT_NAME}.elf ${LIBS})
-target_link_libraries(${PROJECT_NAME}.elf -Wl,-Map=${PROJECT_NAME}.map)
+target_link_libraries(${PROJECT_NAME}.elf -Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.map)
 
 add_custom_command(
 	OUTPUT ${PROJECT_NAME}.bin
 	COMMAND ${CMAKE_OBJCOPY} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
-	COMMAND ${MAKE_EXT_IMPORTS} ${PROJECT_NAME}.map ${PROJECT_NAME}_links.ld
+	COMMAND ${MAKE_EXT_IMPORTS} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.map ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_links.ld
 	DEPENDS ${PROJECT_NAME}.elf
 )
 

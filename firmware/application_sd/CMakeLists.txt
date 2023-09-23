@@ -107,7 +107,7 @@ set(CPPSRC
 	${COMMON}/gcc.cpp
 	main.cpp
 	ui_sd_example.cpp
-	${COMMON}/ui_widget.cpp
+	#${COMMON}/ui_widget.cpp
 )
 
 # C sources to be compiled in ARM mode regardless of the global setting.
