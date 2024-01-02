@@ -75,6 +75,8 @@ class XC2C64A {
     void finalize_read_eeprom();
     void finalize_read_sram(block_id_t id);
 
+    std::array<bool, 192UL> gpio_test(bool control, bool in, bool out);
+
    private:
     static constexpr size_t idcode_length = 32;
     using idcode_t = uint32_t;

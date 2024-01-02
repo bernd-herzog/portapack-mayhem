@@ -794,6 +794,41 @@ static void cmd_cpld_read(BaseSequentialStream* chp, int argc, char* argv[]) {
     }
 }
 
+static void cmd_gpio(BaseSequentialStream* chp, int argc, char* argv[]) {
+    const char* usage =
+        "usage: gpio <pin number> <on/off>\r\n";
+
+    if (argc != 3) {
+        chprintf(chp, usage);
+        return;
+    }
+
+    jtag::GPIOTarget jtag_target_hackrf_cpld{
+        hackrf::one::gpio_cpld_tck,
+        hackrf::one::gpio_cpld_tms,
+        hackrf::one::gpio_cpld_tdi,
+        hackrf::one::gpio_cpld_tdo,
+    };
+
+    hackrf::one::cpld::CPLD hackrf_cpld{jtag_target_hackrf_cpld};
+
+    std::array<bool, 192UL> from_device = hackrf_cpld.gpio_test(strncmp(argv[0], "1", 1) == 0, strncmp(argv[1], "1", 1) == 0, strncmp(argv[2], "1", 1) == 0);
+
+    chprintf(chp, "pin state: ");
+    uint32_t n = 6;
+    uint8_t byte = 0;
+    for (std::array<bool, 192UL>::reverse_iterator i = from_device.rbegin(); i != from_device.rend(); ++i) {
+        auto bit = *i;
+        byte |= bit << (n % 3);
+        if (n % 3 == 2) {
+            chprintf(chp, "%01X ", byte);
+            byte = 0;
+        }
+        n++;
+    }
+    chprintf(chp, "\r\n");
+}
+
 static const ShellCommand commands[] = {
     {"reboot", cmd_reboot},
     {"dfu", cmd_dfu},
@@ -806,6 +841,7 @@ static const ShellCommand commands[] = {
     {"write_memory", cmd_write_memory},
     {"read_memory", cmd_read_memory},
     {"button", cmd_button},
+    {"gpio", cmd_gpio},
     {"ls", cmd_sd_list_dir},
     {"rm", cmd_sd_delete},
     {"open", cmd_sd_open},
