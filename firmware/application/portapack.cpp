@@ -52,6 +52,7 @@ using asahi_kasei::ak4951::AK4951;
 #include "sd_card.hpp"
 #include "string_format.hpp"
 #include "bitmap.hpp"
+#include "ui_styles.hpp"
 
 namespace portapack {
 
@@ -449,6 +450,11 @@ static void initialize_boot_splash_screen() {
         ui::bitmap_titlebar_image,
         ui::Color::white(),
         ui::Color::black());
+
+    painter.draw_string(
+        {2, portapack::display.height() - 10},
+        ui::Styles::white_small,
+        VERSION_STRING);
 }
 
 /* Clock scheme after exiting bootloader in SPIFI mode:
